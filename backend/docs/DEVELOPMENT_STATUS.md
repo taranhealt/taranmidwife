@@ -1,16 +1,16 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
-Diperbarui: 26 Okt 2026. Dasar: commit 4d02659 + perubahan blok ini.
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 23 lulus (127 assertion) sebelum perubahan blok ini.
+Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 34 lulus (235 assertion), exit=0.
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
 |---|---|---|
 | Monorepo, backend Laravel | TERUJI (lokal) | |
 | Auth Sanctum, peran, rate limit, audit | TERUJI (lokal) | token kedaluwarsa 7 hari |
-| Katalog layanan/wilayah | TERUJI (lokal) | data demo hanya via seeder |
+| Katalog layanan/wilayah, seeder demo sintetis | TERUJI (lokal) | seeder menolak produksi |
 | Booking + state machine + penugasan | TERUJI (lokal) | anti double booking, idempotensi, enkripsi alamat |
-| Verifikasi mitra, unggah dokumen privat | SEDANG DIKERJAKAN | lihat blok berikutnya |
+| Verifikasi mitra, dokumen privat, kedaluwarsa SIP | TERUJI (lokal) | 5 pemeriksaan wajib, persetujuan hanya sysadmin, tanpa auto-approval |
 | Penghapusan akun | BELUM DIMULAI | wajib untuk Google Play |
 | Pembayaran | TIDAK DIAKTIFKAN | menunggu keputusan bisnis/hukum |
 | Notifikasi | BELUM DIMULAI | |
@@ -27,3 +27,8 @@ Slot 2 jam; peran approver = sysadmin; ID tabel users berupa angka.
 
 ## Keterbatasan
 Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji pemulihan backup.
+
+## Risiko terbuka
+- Booking CONFIRMED milik mitra yang kemudian EXPIRED/SUSPENDED belum ditangani (keputusan operasional pemilik).
+- Perintah `partners:expire-sip` terdaftar di scheduler, tetapi belum ada cron/scheduler yang menjalankannya (butuh deployment).
+- Hasil `unverified_limited` (mis. IHS) berarti verifikasi belum penuh, bukan klaim terverifikasi.
