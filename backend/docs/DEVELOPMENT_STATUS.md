@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 88 passed (512 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 94 passed (533 assertions), exit=0 (setelah migrate:fresh).
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -16,6 +16,7 @@ Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 | Data penawaran mitra (layanan, wilayah, jadwal) dan mesin pencocokan | TERUJI (lokal) | terhubung ke alur booking lewat penawaran otomatis |
 | Penawaran otomatis ke mitra layak, penolakan/kedaluwarsa berpindah ke mitra berikutnya, perintah bookings:expire-offers | TERUJI (lokal) | batas 10 menit adalah asumsi; jadwal otomatis baru terbukti di staging (belum ada cron); tanpa notifikasi |
 | Lokasi GPS pasien, titik dan radius layanan mitra, pencocokan terdekat, cek jangkauan, batas area pilot | TERUJI (lokal) | batas area pilot adalah PERKIRAAN, belum diverifikasi; UI peta belum dibuat; pelacakan mitra langsung belum ada |
+| Saring otomatis booking baru (sakelar TARAN_AUTO_SCREEN, bawaan MATI), koordinat ikut dianonimkan saat hapus akun, seeder demo mitra layak | TERUJI (lokal) | sakelar menggantikan pemeriksaan administratif admin: NEEDS REVIEW sebelum dinyalakan; titik layanan demo memakai titik tengah area pilot |
 | Inventaris Data safety | DRAF | dari skema aktual; belum final, NEEDS REVIEW hukum; sisi aplikasi belum ada |
 | Pembayaran | TIDAK DIAKTIFKAN | menunggu keputusan bisnis/hukum |
 | Notifikasi | BELUM DIMULAI | |
@@ -66,3 +67,9 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - ASUMSI sementara: titik tengah dan radius area pilot (Kabupaten Batu Bara) adalah perkiraan kasar saya, BELUM DIVERIFIKASI. Ganti lewat `TARAN_PILOT_LAT`, `TARAN_PILOT_LNG`, `TARAN_PILOT_RADIUS_KM` di `.env`.
 - Belum dibuat: UI peta dan pin, pelacakan posisi mitra langsung (EN_ROUTE), daftar tunggu untuk area di luar jangkauan.
 - NEEDS REVIEW (hukum): data lokasi pasien dan mitra; inventaris Data safety sudah ditambah.
+
+## Blok 5 (26 Okt 2026)
+- TERUJI (lokal): `DELETE /api/v1/me` menghapus `patient_lat` dan `patient_lng` pada semua booking pasien; untuk mitra menghapus titik dan radius layanan serta mematikan `accepting_requests`. Temuan di `DATA_SAFETY_INVENTORY.md` sudah ditutup.
+- TERUJI (lokal): sakelar `TARAN_AUTO_SCREEN` (bawaan false). Bila true, booking baru yang sudah tersimpan otomatis menjadi WAITING_MIDWIFE lalu ditawarkan ke mitra terdekat. Detail: `docs/AUTO_SCREEN.md`.
+- TERUJI (lokal): `DevDemoSeeder` membuat mitra demo yang layak (aktif, SIP berlaku, semua layanan demo, wilayah Sei Suka, jadwal penuh, titik layanan di titik tengah area pilot, radius 15 km) dan aman dijalankan berulang.
+- NEEDS REVIEW: apakah pemeriksaan administratif boleh dilewati (keputusan pemilik dan klinis) sebelum sakelar dinyalakan.

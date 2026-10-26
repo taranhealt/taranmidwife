@@ -15,3 +15,7 @@ Endpoint: `DELETE /api/v1/me` dengan body `{"password": "..."}`; maksimal 5 perc
 - Kebutuhan retensi riwayat layanan kesehatan menurut aturan yang berlaku belum ditinjau.
 - Belum ada halaman/URL web untuk permintaan hapus akun di luar aplikasi (umumnya diminta Google Play).
 - Akun `deleted` tidak dapat dipulihkan lewat API.
+
+## Koordinat lokasi (26 Okt 2026)
+- Pasien: `bookings.patient_lat` dan `patient_lng` pada semua booking pasien diisi NULL saat akun dihapus.
+- Mitra: `base_lat`, `base_lng`, `service_radius_km` diisi NULL dan `accepting_requests` menjadi false.

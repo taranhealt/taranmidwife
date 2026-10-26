@@ -9,4 +9,7 @@ return [
     ],
     // Bila true, booking wajib menyertakan latitude dan longitude.
     'require_gps' => (bool) env('TARAN_REQUIRE_GPS', false),
+    // Bila true, booking baru langsung disaring dan ditawarkan otomatis tanpa menunggu admin.
+    // BAWAAN false: pemeriksaan administratif oleh admin tetap berlaku. Lihat docs/AUTO_SCREEN.md.
+    'auto_screen' => (bool) env('TARAN_AUTO_SCREEN', false),
 ];

@@ -9,6 +9,19 @@ class Booking extends Model {
     // status TIDAK mass-assignable: hanya berubah lewat BookingWorkflow.
     protected $fillable = ['code', 'patient_id', 'service_id', 'area_id', 'scheduled_start', 'price_amount',
         'address_line', 'landmark', 'contact_phone', 'idempotency_key', 'patient_lat', 'patient_lng'];
+    protected static function booted(): void {
+        static::created(function (self $b) {
+            if (! config('taran.auto_screen')) { return; }
+            $id = (string) $b->id;
+            \Illuminate\Support\Facades\DB::afterCommit(function () use ($id) {
+                try {
+                    app(\App\Services\AutoScreener::class)->run($id);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('auto_screen_failed', ['booking' => $id, 'error' => $e->getMessage()]);
+                }
+            });
+        });
+    }
     protected $attributes = ['status' => 'REQUESTED'];
     protected function casts(): array {
         return ['scheduled_start' => 'datetime', 'address_line' => 'encrypted', 'contact_phone' => 'encrypted',

@@ -22,3 +22,7 @@
 ## Belum ada
 - UI peta dan pin; pelacakan posisi mitra langsung; daftar tunggu untuk area baru; geocoding alamat.
 - Keputusan hukum tentang data lokasi (UU PDP) adalah tanggung jawab pemilik: NEEDS REVIEW.
+
+## Seeder demo dan saring otomatis (26 Okt 2026)
+- `DevDemoSeeder` membuat mitra demo dengan titik layanan di titik tengah area pilot (bukan koordinat Sei Suka yang diverifikasi), radius 15 km, jadwal penuh.
+- Saring otomatis: lihat `docs/AUTO_SCREEN.md`.

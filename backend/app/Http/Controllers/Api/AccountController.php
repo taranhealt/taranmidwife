@@ -40,7 +40,7 @@ class AccountController extends Controller {
 
             Booking::where('patient_id', $user->id)->get()->each(function ($b) {
                 $b->forceFill(['address_line' => self::PLACEHOLDER, 'contact_phone' => self::PLACEHOLDER,
-                    'landmark' => null, 'cancel_reason' => null])->save();
+                    'landmark' => null, 'cancel_reason' => null, 'patient_lat' => null, 'patient_lng' => null])->save();
             });
 
             $profile = PartnerProfile::where('user_id', $user->id)->lockForUpdate()->first();
@@ -49,7 +49,8 @@ class AccountController extends Controller {
                 $from = $profile->verification_status->value;
                 PartnerDocument::where('partner_profile_id', $profile->id)->delete();
                 $profile->forceFill(['nik' => null, 'sip_number' => null, 'sip_issuer' => null, 'sip_expires_on' => null,
-                    'practice_area' => null, 'review_reason' => null,
+                    'practice_area' => null, 'review_reason' => null, 'base_lat' => null, 'base_lng' => null,
+                'service_radius_km' => null, 'accepting_requests' => false,
                     'verification_status' => PartnerVerificationStatus::from('SUSPENDED')])->save();
                 DB::table('partner_verification_events')->insert(['id' => (string) Str::ulid(),
                     'partner_profile_id' => $profile->id, 'from_status' => $from, 'to_status' => 'SUSPENDED',
