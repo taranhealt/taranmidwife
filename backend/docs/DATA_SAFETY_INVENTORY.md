@@ -177,3 +177,7 @@ users.status (character varying)
 
 ## Halaman hapus akun (26 Okt 2026) - DRAF
 - `/hapus-akun` tidak memuat sumber pihak ketiga (diuji). Email dan kata sandi dikirim ke API saat masuk dan saat konfirmasi; token hanya disimpan di memori halaman (tidak di penyimpanan peramban).
+
+## Token atur ulang kata sandi (27 Okt 2026) - DRAF
+- Tabel `password_reset_tokens`: email dan hash token, sementara (kedaluwarsa dalam 60 menit, dihapus setelah dipakai atau diganti permintaan baru).
+- Email dikirim ke alamat akun; isi email memuat tautan dengan token. Penyedia email belum dipilih: NEEDS REVIEW (pemrosesan pihak ketiga).

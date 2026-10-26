@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 104 passed (576 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 114 passed (644 assertions), exit=0 (setelah migrate:fresh).
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -93,3 +93,9 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - DRAF: halaman web permintaan hapus akun di `/hapus-akun` (`resources/views/hapus-akun.blade.php`, `public/js/hapus-akun.js`). Diuji hanya: halaman termuat tanpa login, aset ada, tanpa sumber pihak ketiga. Alur di browser (masuk, konfirmasi, hapus, pesan 409 dan 429) BELUM diuji.
 - Memakai `DELETE /api/v1/me` yang sudah TERUJI (lihat `docs/ACCOUNT_DELETION.md`). Pesan untuk 409 dan 429 ditentukan dari kode status; pesan kesalahan lain dari respons server (bentuk respons kata sandi salah belum saya baca).
 - NEEDS REVIEW (hukum): teks peringatan, retensi, dan kesesuaian dengan persyaratan Google Play. URL publik baru ada setelah deployment.
+
+## Lupa kata sandi dan halaman hukum (27 Okt 2026)
+- TERUJI (lokal): lupa dan atur ulang kata sandi lewat API dan halaman web (`/lupa-sandi`, `/atur-ulang-sandi`). Respons permintaan selalu sama; akun tidak aktif tidak dikirimi email; token sekali pakai berlaku 60 menit; semua token login dicabut setelah sandi berubah. Detail: `docs/PASSWORD_RESET.md`.
+- DRAF (bukan hukum final): halaman `/kebijakan-privasi`, berisi data yang memang dikumpulkan kode dan penanda [ISI] atau [KEPUTUSAN] untuk bagian yang belum ada. NEEDS REVIEW (hukum): seluruh isi, retensi, hak pengguna, dan pihak ketiga.
+- Belum ada: pengiriman email sungguhan (MAIL_MAILER=log; penyedia email dipilih saat staging), tautan kebijakan privasi di semua halaman, pengaturan ulang kata sandi lewat aplikasi seluler.
+- Hasil uji: 114 passed (644 assertions).
