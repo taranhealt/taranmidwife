@@ -14,3 +14,7 @@ Asumsi sementara: peran "approver" belum ada; keputusan persetujuan mitra akan d
 - patient, partner: ajukan dan lihat pengaduan milik sendiri (booking terkait saja).
 - ops_admin, reviewer: lihat dan tangani semua pengaduan.
 - sysadmin: lihat saja.
+
+## Penawaran mitra
+- partner: kelola layanan, wilayah, jadwal, dan saklar menerima permintaan milik sendiri.
+- ops_admin: lihat kandidat mitra untuk booking. Peran lain tidak.

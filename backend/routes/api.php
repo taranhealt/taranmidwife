@@ -60,12 +60,15 @@ Route::prefix('v1')->group(function () {
             });
             Route::middleware(EnsureRole::class . ':ops_admin')->group(function () {
                 Route::post('bookings/{booking}/screen', [AdminBookingController::class, 'screen']);
+                Route::get('bookings/{booking}/candidates', [\App\Http\Controllers\Api\AdminMatchingController::class, 'candidates']);
                 Route::post('bookings/{booking}/assign', [AdminBookingController::class, 'assign']);
                 Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel']);
             });
         });
         Route::prefix('midwife')->middleware(EnsureRole::class . ':partner')->group(function () {
             Route::get('profile', [MidwifeProfileController::class, 'show']);
+            Route::get('offerings', [\App\Http\Controllers\Api\PartnerOfferingsController::class, 'show']);
+            Route::put('offerings', [\App\Http\Controllers\Api\PartnerOfferingsController::class, 'update']);
             Route::put('profile', [MidwifeProfileController::class, 'update']);
             Route::post('documents', [MidwifeProfileController::class, 'upload']);
             Route::post('verification/submit', [MidwifeProfileController::class, 'submit']);
