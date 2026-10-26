@@ -1,0 +1,160 @@
+# Inventaris Data Safety (DRAF)
+
+Status: draf teknis dari skema dan kode backend lokal. BUKAN jawaban final formulir Google Play.
+Jawaban final harus ditinjau dan disetujui pemilik, dan aspek hukumnya NEEDS REVIEW (UU PDP, ketentuan data kesehatan).
+Aplikasi Flutter belum ada, jadi pengumpulan data di sisi aplikasi (SDK, analitik, iklan, crash report) belum bisa diinventarisasi.
+
+## Data yang dikumpulkan backend
+| Data | Pemilik | Tujuan | Perlindungan di database | Dihapus saat akun dihapus |
+|---|---|---|---|---|
+| Nama, email | pasien, mitra, staf | akun dan komunikasi | tidak dienkripsi (kata sandi di-hash) | diganti nilai anonim |
+| Nomor telepon akun | pasien, mitra | akun | tidak dienkripsi | dikosongkan |
+| Alamat dan telepon kontak booking | pasien | pelaksanaan layanan | terenkripsi | diganti `[DIHAPUS]` |
+| Patokan lokasi, alasan batal | pasien | pelaksanaan layanan | tidak dienkripsi | dikosongkan |
+| Jenis layanan, jadwal, wilayah, status booking | pasien | pelaksanaan layanan | tidak dienkripsi | dipertahankan tanpa identitas (keputusan pemilik) |
+| NIK, nomor SIP, penerbit, masa berlaku, wilayah praktik | mitra | verifikasi profesi | NIK terenkripsi, sisanya tidak | dikosongkan |
+| Dokumen SIP, STR, identitas, foto wajah | mitra | verifikasi profesi | disk privat, nama acak, tidak dienkripsi | dihapus (database dan file) |
+| Isi pengaduan dan catatan penanganan | pasien, mitra | penanganan pengaduan | terenkripsi | dipertahankan (belum ada aturan retensi) |
+| Log audit (aktor, aksi, waktu) | semua | keamanan dan akuntabilitas | tidak dienkripsi | dipertahankan, aktor dianonimkan |
+| Token akses | semua | autentikasi | hash | dicabut |
+
+## Catatan penting
+- Isi layanan (nifas, menyusui, bayi baru lahir) dan pengaduan dapat tergolong data kesehatan. Klasifikasi resminya NEEDS REVIEW hukum.
+- Enkripsi dalam perjalanan: HTTPS belum dipasang karena belum ada deployment, jadi belum boleh dinyatakan.
+- Berbagi data dengan pihak ketiga: belum ada integrasi (pembayaran dan notifikasi belum aktif). Berubah bila itu ditambahkan.
+- Penghapusan akun lewat API sudah ada. Halaman web permintaan hapus akun belum ada.
+- Retensi: belum diputuskan pemilik.
+- Alamat IP dan log server: belum ditinjau, bisa tercatat oleh server web atau Laravel. Perlu dicek saat deployment.
+
+## Daftar kolom aktual (otomatis dari database)
+Dibuat dari `information_schema` pada saat dokumen ini dibuat. Periksa ulang setiap ada migrasi baru.
+
+```
+areas.id (character)
+areas.name (character varying)
+areas.active (boolean)
+areas.created_at (timestamp without time zone)
+areas.updated_at (timestamp without time zone)
+assignments.id (character)
+assignments.booking_id (character)
+assignments.partner_id (bigint)
+assignments.scheduled_start (timestamp with time zone)
+assignments.active (boolean)
+assignments.accepted_at (timestamp with time zone)
+assignments.created_at (timestamp without time zone)
+assignments.updated_at (timestamp without time zone)
+audit_events.id (character)
+audit_events.actor_id (bigint)
+audit_events.action (character varying)
+audit_events.entity_type (character varying)
+audit_events.entity_id (character varying)
+audit_events.outcome (character varying)
+audit_events.occurred_at (timestamp with time zone)
+booking_status_histories.id (character)
+booking_status_histories.booking_id (character)
+booking_status_histories.from_status (character varying)
+booking_status_histories.to_status (character varying)
+booking_status_histories.actor_id (bigint)
+booking_status_histories.reason (character varying)
+booking_status_histories.occurred_at (timestamp with time zone)
+bookings.id (character)
+bookings.code (character varying)
+bookings.patient_id (bigint)
+bookings.service_id (character)
+bookings.area_id (character)
+bookings.status (character varying)
+bookings.scheduled_start (timestamp with time zone)
+bookings.price_amount (integer)
+bookings.address_line (text)
+bookings.landmark (character varying)
+bookings.contact_phone (text)
+bookings.idempotency_key (character varying)
+bookings.cancel_reason (character varying)
+bookings.created_at (timestamp without time zone)
+bookings.updated_at (timestamp without time zone)
+complaint_events.id (character)
+complaint_events.complaint_id (character)
+complaint_events.from_status (character varying)
+complaint_events.to_status (character varying)
+complaint_events.actor_id (bigint)
+complaint_events.occurred_at (timestamp with time zone)
+complaints.id (character)
+complaints.booking_id (character)
+complaints.reporter_id (bigint)
+complaints.category (character varying)
+complaints.description (text)
+complaints.status (character varying)
+complaints.safety_flag (boolean)
+complaints.handler_id (bigint)
+complaints.resolution_note (text)
+complaints.resolved_at (timestamp with time zone)
+complaints.created_at (timestamp without time zone)
+complaints.updated_at (timestamp without time zone)
+partner_documents.id (character)
+partner_documents.partner_profile_id (character)
+partner_documents.type (character varying)
+partner_documents.storage_key (character varying)
+partner_documents.mime (character varying)
+partner_documents.size_bytes (integer)
+partner_documents.created_at (timestamp without time zone)
+partner_documents.updated_at (timestamp without time zone)
+partner_profiles.id (character)
+partner_profiles.user_id (bigint)
+partner_profiles.verification_status (character varying)
+partner_profiles.created_at (timestamp without time zone)
+partner_profiles.updated_at (timestamp without time zone)
+partner_profiles.nik (text)
+partner_profiles.sip_number (character varying)
+partner_profiles.sip_issuer (character varying)
+partner_profiles.sip_expires_on (date)
+partner_profiles.practice_area (character varying)
+partner_profiles.submitted_at (timestamp with time zone)
+partner_profiles.reviewed_by (bigint)
+partner_profiles.review_reason (character varying)
+partner_profiles.reviewed_at (timestamp with time zone)
+partner_verification_events.id (character)
+partner_verification_events.partner_profile_id (character)
+partner_verification_events.from_status (character varying)
+partner_verification_events.to_status (character varying)
+partner_verification_events.actor_id (bigint)
+partner_verification_events.reason (character varying)
+partner_verification_events.occurred_at (timestamp with time zone)
+partner_verification_items.id (character)
+partner_verification_items.partner_profile_id (character)
+partner_verification_items.item_type (character varying)
+partner_verification_items.result (character varying)
+partner_verification_items.method (character varying)
+partner_verification_items.reviewer_id (bigint)
+partner_verification_items.checked_at (timestamp with time zone)
+personal_access_tokens.id (bigint)
+personal_access_tokens.tokenable_type (character varying)
+personal_access_tokens.tokenable_id (bigint)
+personal_access_tokens.name (text)
+personal_access_tokens.token (character varying)
+personal_access_tokens.abilities (text)
+personal_access_tokens.last_used_at (timestamp without time zone)
+personal_access_tokens.expires_at (timestamp without time zone)
+personal_access_tokens.created_at (timestamp without time zone)
+personal_access_tokens.updated_at (timestamp without time zone)
+services.id (character)
+services.code (character varying)
+services.name (character varying)
+services.description (text)
+services.scope (text)
+services.limitations (text)
+services.price_amount (integer)
+services.active (boolean)
+services.created_at (timestamp without time zone)
+services.updated_at (timestamp without time zone)
+users.id (bigint)
+users.name (character varying)
+users.email (character varying)
+users.email_verified_at (timestamp without time zone)
+users.password (character varying)
+users.remember_token (character varying)
+users.created_at (timestamp without time zone)
+users.updated_at (timestamp without time zone)
+users.role (character varying)
+users.phone (character varying)
+users.status (character varying)
+```

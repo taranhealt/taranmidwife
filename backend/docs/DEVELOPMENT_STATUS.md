@@ -13,6 +13,7 @@ Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 | Verifikasi mitra, dokumen privat, kedaluwarsa SIP | TERUJI (lokal) | 5 pemeriksaan wajib, persetujuan hanya sysadmin, tanpa auto-approval |
 | Penghapusan akun (anonimisasi) | TERUJI (lokal) | hanya pasien/mitra; ditolak bila ada pesanan aktif; masa retensi = keputusan pemilik, NEEDS REVIEW hukum |
 | Pengaduan (pasien/mitra) dan penanganan admin | TERUJI (lokal) | teks terenkripsi; kategori SAFETY hanya ditandai, aturan eskalasi NEEDS REVIEW klinis |
+| Inventaris Data safety | DRAF | dari skema aktual; belum final, NEEDS REVIEW hukum; sisi aplikasi belum ada |
 | Pembayaran | TIDAK DIAKTIFKAN | menunggu keputusan bisnis/hukum |
 | Notifikasi | BELUM DIMULAI | |
 | Dashboard admin web | BELUM DIMULAI | |
