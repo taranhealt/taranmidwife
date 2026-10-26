@@ -13,7 +13,7 @@ Endpoint: `DELETE /api/v1/me` dengan body `{"password": "..."}`; maksimal 5 perc
 ## Belum diputuskan (keputusan pemilik) dan NEEDS REVIEW hukum
 - Masa retensi: asumsi sementara, data transaksi anonim disimpan tanpa batas waktu.
 - Kebutuhan retensi riwayat layanan kesehatan menurut aturan yang berlaku belum ditinjau.
-- Belum ada halaman/URL web untuk permintaan hapus akun di luar aplikasi (umumnya diminta Google Play).
+- Halaman web permintaan hapus akun: `/hapus-akun` (DRAF, belum diuji di browser, URL publik menunggu deployment). Tinjauan hukum atas teks dan retensi tetap NEEDS REVIEW.
 - Akun `deleted` tidak dapat dipulihkan lewat API.
 
 ## Koordinat lokasi (26 Okt 2026)

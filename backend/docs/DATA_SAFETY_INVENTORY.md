@@ -174,3 +174,6 @@ users.status (character varying)
 ## UI Mitra web (26 Okt 2026) - DRAF
 - Titik dan radius layanan mitra dikirim ke API saat disimpan; token masuk di `sessionStorage`.
 - Pihak ketiga sama dengan UI Pasien (`unpkg.com`, `tile.openstreetmap.org`): alamat IP dan area peta yang dilihat. NEEDS REVIEW (hukum): pengungkapan kepada mitra dan dasar pemrosesan.
+
+## Halaman hapus akun (26 Okt 2026) - DRAF
+- `/hapus-akun` tidak memuat sumber pihak ketiga (diuji). Email dan kata sandi dikirim ke API saat masuk dan saat konfirmasi; token hanya disimpan di memori halaman (tidak di penyimpanan peramban).

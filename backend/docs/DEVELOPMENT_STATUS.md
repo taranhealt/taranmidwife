@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 102 passed (568 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 104 passed (576 assertions), exit=0 (setelah migrate:fresh).
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -19,6 +19,7 @@ Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 | Saring otomatis booking baru (sakelar TARAN_AUTO_SCREEN, bawaan MATI), koordinat ikut dianonimkan saat hapus akun, seeder demo mitra layak | TERUJI (lokal) | sakelar menggantikan pemeriksaan administratif admin: NEEDS REVIEW sebelum dinyalakan; titik layanan demo memakai titik tengah area pilot |
 | UI Pasien web di /app: masuk, GPS, peta dan pin, cek jangkauan, pesan, daftar dan batalkan pesanan | DRAF (halaman diuji dimuat; interaksi di browser BELUM diuji) | pendaftaran dan masuk dari UI belum diuji terhadap AuthController; peta butuh internet (Leaflet dan tile OpenStreetMap dari CDN, tanpa SRI); teks belum ditinjau klinis |
 | UI Mitra web di /mitra: masuk dan daftar mitra, titik dan radius layanan di peta, layanan, wilayah, jadwal, terima atau tolak tawaran, mulai dan selesaikan kunjungan | DRAF (halaman diuji dimuat, batas waktu tawaran TERUJI lokal; interaksi di browser BELUM diuji) | pengajuan dan unggah dokumen verifikasi belum ada di UI; peta butuh internet (CDN tanpa SRI); hanya 50 pesanan terbaru; teks belum ditinjau klinis |
+| Halaman hapus akun web di /hapus-akun: masuk, peringatan konsekuensi, konfirmasi kata sandi, panggil DELETE /api/v1/me | DRAF (halaman diuji dimuat dan tanpa pihak ketiga; interaksi di browser BELUM diuji) | belum ada jalur bagi yang lupa kata sandi; teks belum ditinjau hukum; URL produksi menunggu deployment |
 | Inventaris Data safety | DRAF | dari skema aktual; belum final, NEEDS REVIEW hukum; sisi aplikasi belum ada |
 | Pembayaran | TIDAK DIAKTIFKAN | menunggu keputusan bisnis/hukum |
 | Notifikasi | BELUM DIMULAI | |
@@ -87,3 +88,8 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - Diperiksa dengan membaca kode `AuthController` (bukan diuji dari browser): register menerima `role` patient atau partner dan mengembalikan `token` dan `user.role`; ini dipakai kedua UI.
 - Diperbaiki: formulir daftar UI Pasien kini meminta kata sandi minimal 10 karakter, sama dengan server (diuji).
 - NEEDS REVIEW: teks UI Mitra belum ditinjau klinis; persetujuan penggunaan lokasi mitra (hukum).
+
+## Blok 8 (26 Okt 2026)
+- DRAF: halaman web permintaan hapus akun di `/hapus-akun` (`resources/views/hapus-akun.blade.php`, `public/js/hapus-akun.js`). Diuji hanya: halaman termuat tanpa login, aset ada, tanpa sumber pihak ketiga. Alur di browser (masuk, konfirmasi, hapus, pesan 409 dan 429) BELUM diuji.
+- Memakai `DELETE /api/v1/me` yang sudah TERUJI (lihat `docs/ACCOUNT_DELETION.md`). Pesan untuk 409 dan 429 ditentukan dari kode status; pesan kesalahan lain dari respons server (bentuk respons kata sandi salah belum saya baca).
+- NEEDS REVIEW (hukum): teks peringatan, retensi, dan kesesuaian dengan persyaratan Google Play. URL publik baru ada setelah deployment.
