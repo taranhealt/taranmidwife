@@ -28,3 +28,13 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #E6EBF5; color: var(--navy); white-space: nowrap; }
 .small { font-size: 13px; color: var(--muted); }
 [hidden] { display: none !important; }
+
+/* UI Mitra */
+label.chk { display: flex; gap: 8px; align-items: center; margin: 6px 0; font-size: 14px; color: var(--text); }
+label.chk input { width: auto; min-height: 0; }
+.tbl-wrap { overflow-x: auto; }
+table.avail { border-collapse: collapse; font-size: 13px; width: 100%; }
+table.avail th, table.avail td { border: 1px solid var(--line); padding: 6px; text-align: center; }
+table.avail input { width: auto; min-height: 0; }
+h3 { font-size: 14px; margin: 14px 0 4px; color: var(--navy); }
+a.tel { color: var(--navy); }

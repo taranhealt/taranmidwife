@@ -170,3 +170,7 @@ users.status (character varying)
 ## UI Pasien web (26 Okt 2026) - DRAF
 - Sisi peramban: token masuk di `sessionStorage`; koordinat dikirim ke API hanya saat pesanan diajukan atau cek jangkauan.
 - Pihak ketiga: `unpkg.com` (Leaflet) dan `tile.openstreetmap.org` (tile peta) menerima alamat IP dan area peta yang dilihat. NEEDS REVIEW (hukum): pengungkapan kepada pengguna dan dasar pemrosesan.
+
+## UI Mitra web (26 Okt 2026) - DRAF
+- Titik dan radius layanan mitra dikirim ke API saat disimpan; token masuk di `sessionStorage`.
+- Pihak ketiga sama dengan UI Pasien (`unpkg.com`, `tile.openstreetmap.org`): alamat IP dan area peta yang dilihat. NEEDS REVIEW (hukum): pengungkapan kepada mitra dan dasar pemrosesan.

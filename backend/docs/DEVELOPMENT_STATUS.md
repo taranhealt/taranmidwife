@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 98 passed (549 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 102 passed (568 assertions), exit=0 (setelah migrate:fresh).
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -18,6 +18,7 @@ Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 | Lokasi GPS pasien, titik dan radius layanan mitra, pencocokan terdekat, cek jangkauan, batas area pilot | TERUJI (lokal) | batas area pilot adalah PERKIRAAN, belum diverifikasi; UI peta belum dibuat; pelacakan mitra langsung belum ada |
 | Saring otomatis booking baru (sakelar TARAN_AUTO_SCREEN, bawaan MATI), koordinat ikut dianonimkan saat hapus akun, seeder demo mitra layak | TERUJI (lokal) | sakelar menggantikan pemeriksaan administratif admin: NEEDS REVIEW sebelum dinyalakan; titik layanan demo memakai titik tengah area pilot |
 | UI Pasien web di /app: masuk, GPS, peta dan pin, cek jangkauan, pesan, daftar dan batalkan pesanan | DRAF (halaman diuji dimuat; interaksi di browser BELUM diuji) | pendaftaran dan masuk dari UI belum diuji terhadap AuthController; peta butuh internet (Leaflet dan tile OpenStreetMap dari CDN, tanpa SRI); teks belum ditinjau klinis |
+| UI Mitra web di /mitra: masuk dan daftar mitra, titik dan radius layanan di peta, layanan, wilayah, jadwal, terima atau tolak tawaran, mulai dan selesaikan kunjungan | DRAF (halaman diuji dimuat, batas waktu tawaran TERUJI lokal; interaksi di browser BELUM diuji) | pengajuan dan unggah dokumen verifikasi belum ada di UI; peta butuh internet (CDN tanpa SRI); hanya 50 pesanan terbaru; teks belum ditinjau klinis |
 | Inventaris Data safety | DRAF | dari skema aktual; belum final, NEEDS REVIEW hukum; sisi aplikasi belum ada |
 | Pembayaran | TIDAK DIAKTIFKAN | menunggu keputusan bisnis/hukum |
 | Notifikasi | BELUM DIMULAI | |
@@ -79,3 +80,10 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - TERUJI (lokal): saring otomatis dipindah dari event model ke `BookingController::store`. Respons `POST /bookings` kini memuat status terbaru dan riwayat status berurutan (REQUESTED lebih dulu). Dua temuan blok 5 ditutup.
 - DRAF: UI Pasien web di `/app` (`resources/views/patient.blade.php`, `public/js/patient.js`, `public/css/patient.css`). Diuji hanya: halaman termuat, aset ada, titik tengah peta mengikuti konfigurasi. Interaksi (GPS, peta, kirim pesanan) BELUM diuji di browser; lihat `docs/PATIENT_WEB.md`.
 - NEEDS REVIEW: teks UI (pemberitahuan darurat, keterangan layanan) belum ditinjau klinis.
+
+## Blok 7 (26 Okt 2026)
+- TERUJI (lokal): respons pesanan untuk mitra memuat `offer_expires_at` pada tawaran otomatis berstatus OFFERED; tidak ada pada penugasan manual dan tidak pernah dikirim ke pasien.
+- DRAF: UI Mitra web di `/mitra` (`resources/views/mitra.blade.php`, `public/js/mitra.js`, memakai `public/css/patient.css`). Diuji hanya: halaman termuat dan aset ada. Interaksi (peta, simpan pengaturan, terima, tolak, mulai, selesaikan) BELUM diuji di browser; lihat `docs/PARTNER_WEB.md`.
+- Diperiksa dengan membaca kode `AuthController` (bukan diuji dari browser): register menerima `role` patient atau partner dan mengembalikan `token` dan `user.role`; ini dipakai kedua UI.
+- Diperbaiki: formulir daftar UI Pasien kini meminta kata sandi minimal 10 karakter, sama dengan server (diuji).
+- NEEDS REVIEW: teks UI Mitra belum ditinjau klinis; persetujuan penggunaan lokasi mitra (hukum).

@@ -30,8 +30,8 @@
       <input id="r-name" type="text" autocomplete="name" required maxlength="100">
       <label for="r-email">Email</label>
       <input id="r-email" type="email" autocomplete="email" required>
-      <label for="r-pass">Kata sandi</label>
-      <input id="r-pass" type="password" autocomplete="new-password" required minlength="8">
+      <label for="r-pass">Kata sandi (minimal 10 karakter)</label>
+      <input id="r-pass" type="password" autocomplete="new-password" required minlength="10">
       <div class="row"><button type="submit">Daftar</button><button id="show-login" class="secondary" type="button">Sudah punya akun</button></div>
     </form>
     <p class="note">Layanan ini bukan layanan gawat darurat. Jika terjadi keadaan darurat, segera ke fasilitas kesehatan terdekat.</p>

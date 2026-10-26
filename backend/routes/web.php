@@ -6,3 +6,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/app', fn () => view('patient'))->name('patient.app');
+Route::get('/mitra', fn () => view('mitra'))->name('partner.app');
