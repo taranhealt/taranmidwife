@@ -91,6 +91,14 @@ class BookingController extends Controller {
         }
         DB::table('booking_status_histories')->insert(['id' => (string) Str::ulid(), 'booking_id' => $b->id,
             'from_status' => null, 'to_status' => 'REQUESTED', 'actor_id' => $user->id, 'occurred_at' => now()]);
+        if (config('taran.auto_screen')) {
+            try {
+                app(\App\Services\AutoScreener::class)->run((string) $b->id);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('auto_screen_failed', ['booking' => (string) $b->id, 'error' => $e->getMessage()]);
+            }
+            $b = $b->fresh();
+        }
         return response()->json(['data' => BookingPresenter::present($b->load(['service', 'area']), $user),
             'notice' => 'Permintaan diterima. Jadwal belum final sampai dikonfirmasi.'], 201);
     }

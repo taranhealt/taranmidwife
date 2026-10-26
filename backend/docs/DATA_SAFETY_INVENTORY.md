@@ -166,3 +166,7 @@ users.status (character varying)
 
 ## Pembaruan koordinat lokasi (26 Okt 2026)
 - Koordinat pasien dan titik layanan mitra kini ikut dihapus oleh logika penghapusan akun (diuji). Poin "perlu ditinjau" di atas untuk penghapusan sudah ditutup; NEEDS REVIEW (hukum) tetap berlaku untuk klasifikasi, dasar pemrosesan, dan retensi.
+
+## UI Pasien web (26 Okt 2026) - DRAF
+- Sisi peramban: token masuk di `sessionStorage`; koordinat dikirim ke API hanya saat pesanan diajukan atau cek jangkauan.
+- Pihak ketiga: `unpkg.com` (Leaflet) dan `tile.openstreetmap.org` (tile peta) menerima alamat IP dan area peta yang dilihat. NEEDS REVIEW (hukum): pengungkapan kepada pengguna dan dasar pemrosesan.
