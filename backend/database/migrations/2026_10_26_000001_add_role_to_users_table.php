@@ -10,7 +10,7 @@ return new class extends Migration {
             $t->string('phone', 20)->nullable()->unique();
             $t->string('status', 20)->default('active');
         });
-        DB::statement("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('patient','partner','admin','superadmin'))");
+        DB::statement("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('patient','partner','ops_admin','reviewer','sysadmin'))");
         DB::statement("ALTER TABLE users ADD CONSTRAINT users_status_check CHECK (status IN ('active','suspended'))");
     }
     public function down(): void {
