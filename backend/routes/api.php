@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\MidwifeBookingController;
+use App\Http\Controllers\Api\MidwifeProfileController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
@@ -29,6 +30,17 @@ Route::prefix('v1')->group(function () {
         Route::prefix('admin')->group(function () {
             Route::middleware(EnsureRole::class . ':reviewer,sysadmin')->group(function () {
                 Route::get('partners', [AdminPartnerController::class, 'index']);
+                Route::get('partners/{partner}', [AdminPartnerController::class, 'show']);
+                Route::get('partners/{partner}/documents/{document}', [AdminPartnerController::class, 'document']);
+                Route::post('partners/{partner}/start-review', [AdminPartnerController::class, 'startReview']);
+                Route::post('partners/{partner}/checks', [AdminPartnerController::class, 'recordChecks']);
+                Route::post('partners/{partner}/request-correction', [AdminPartnerController::class, 'requestCorrection']);
+            });
+            Route::middleware(EnsureRole::class . ':sysadmin')->group(function () {
+                Route::post('partners/{partner}/approve', [AdminPartnerController::class, 'approve']);
+                Route::post('partners/{partner}/reject', [AdminPartnerController::class, 'reject']);
+                Route::post('partners/{partner}/activate', [AdminPartnerController::class, 'activate']);
+                Route::post('partners/{partner}/suspend', [AdminPartnerController::class, 'suspend']);
             });
             Route::middleware(EnsureRole::class . ':ops_admin')->group(function () {
                 Route::post('bookings/{booking}/screen', [AdminBookingController::class, 'screen']);
@@ -37,6 +49,10 @@ Route::prefix('v1')->group(function () {
             });
         });
         Route::prefix('midwife')->middleware(EnsureRole::class . ':partner')->group(function () {
+            Route::get('profile', [MidwifeProfileController::class, 'show']);
+            Route::put('profile', [MidwifeProfileController::class, 'update']);
+            Route::post('documents', [MidwifeProfileController::class, 'upload']);
+            Route::post('verification/submit', [MidwifeProfileController::class, 'submit']);
             Route::post('bookings/{booking}/accept', [MidwifeBookingController::class, 'accept']);
             Route::post('bookings/{booking}/decline', [MidwifeBookingController::class, 'decline']);
             Route::post('bookings/{booking}/start', [MidwifeBookingController::class, 'start']);
