@@ -58,11 +58,16 @@ class BookingController extends Controller {
             'address_line' => ['required', 'string', 'max:300'],
             'landmark' => ['nullable', 'string', 'max:100'],
             'contact_phone' => ['required', 'regex:/^\+?[0-9]{8,15}$/'],
+            'latitude' => [config('taran.require_gps') ? 'required' : 'nullable', 'numeric', 'between:-90,90', 'required_with:longitude'],
+            'longitude' => [config('taran.require_gps') ? 'required' : 'nullable', 'numeric', 'between:-180,180', 'required_with:latitude'],
         ]);
         $service = Service::where('id', $data['service_id'])->where('active', true)->first();
         $area = Area::where('id', $data['area_id'])->where('active', true)->first();
         if (! $service) { throw ValidationException::withMessages(['service_id' => 'Layanan tidak tersedia.']); }
         if (! $area) { throw ValidationException::withMessages(['area_id' => 'Wilayah belum dilayani.']); }
+        if (isset($data['latitude'], $data['longitude']) && ! \App\Support\Geo::withinPilot((float) $data['latitude'], (float) $data['longitude'])) {
+            return response()->json(['code' => 'OUT_OF_COVERAGE', 'message' => 'Lokasi Anda di luar area layanan pilot kami.'], 422);
+        }
         $start = Carbon::parse($data['scheduled_start'])->setTimezone(self::TZ);
         if ($start->minute !== 0 || $start->second !== 0 || ! in_array($start->hour, self::SLOT_HOURS, true)) {
             throw ValidationException::withMessages(['scheduled_start' => 'Pilih slot yang tersedia (jam 08, 10, 12, 14, atau 16 WIB).']);
@@ -77,6 +82,8 @@ class BookingController extends Controller {
                 'scheduled_start' => $start->copy()->utc(), 'price_amount' => $service->price_amount,
                 'address_line' => $data['address_line'], 'landmark' => $data['landmark'] ?? null,
                 'contact_phone' => $data['contact_phone'], 'idempotency_key' => $key,
+                'patient_lat' => isset($data['latitude']) ? (string) round((float) $data['latitude'], 6) : null,
+                'patient_lng' => isset($data['longitude']) ? (string) round((float) $data['longitude'], 6) : null,
             ]);
         } catch (UniqueConstraintViolationException) {
             $b = Booking::where('patient_id', $user->id)->where('idempotency_key', $key)->firstOrFail();

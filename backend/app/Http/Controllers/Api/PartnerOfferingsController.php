@@ -24,6 +24,11 @@ class PartnerOfferingsController extends Controller {
             'service_ids' => DB::table('partner_services')->where('partner_profile_id', $pid)->orderBy('service_id')->pluck('service_id')->all(),
             'area_ids' => DB::table('partner_areas')->where('partner_profile_id', $pid)->orderBy('area_id')->pluck('area_id')->all(),
             'availability' => $avail,
+            'service_point' => (function () use ($pid) {
+                $r = DB::table('partner_profiles')->where('id', $pid)->first(['base_lat', 'base_lng', 'service_radius_km']);
+                return $r && $r->base_lat !== null
+                    ? ['lat' => (float) $r->base_lat, 'lng' => (float) $r->base_lng, 'radius_km' => (int) $r->service_radius_km] : null;
+            })(),
         ];
     }
     public function show(Request $request): JsonResponse {
@@ -41,6 +46,10 @@ class PartnerOfferingsController extends Controller {
             'availability.*.hours' => ['required', 'array', 'min:1', 'max:5'],
             'availability.*.hours.*' => ['integer', Rule::in(BookingController::SLOT_HOURS)],
             'accepting_requests' => ['sometimes', 'boolean'],
+            'service_point' => ['sometimes', 'nullable', 'array:lat,lng,radius_km'],
+            'service_point.lat' => ['required_with:service_point', 'numeric', 'between:-90,90'],
+            'service_point.lng' => ['required_with:service_point', 'numeric', 'between:-180,180'],
+            'service_point.radius_km' => ['required_with:service_point', 'integer', 'between:1,100'],
         ]);
         if (! empty($data['service_ids']) && Service::whereIn('id', $data['service_ids'])->where('active', true)->count() !== count($data['service_ids'])) {
             throw ValidationException::withMessages(['service_ids' => 'Ada layanan yang tidak tersedia.']);
@@ -73,6 +82,12 @@ class PartnerOfferingsController extends Controller {
                         DB::table('partner_availabilities')->insert(['partner_profile_id' => $pid, 'weekday' => (int) $day['weekday'], 'hour' => (int) $h]);
                     }
                 }
+            }
+            if (array_key_exists('service_point', $data)) {
+                $sp = $data['service_point'];
+                DB::table('partner_profiles')->where('id', $pid)->update(empty($sp)
+                    ? ['base_lat' => null, 'base_lng' => null, 'service_radius_km' => null]
+                    : ['base_lat' => round((float) $sp['lat'], 6), 'base_lng' => round((float) $sp['lng'], 6), 'service_radius_km' => (int) $sp['radius_km']]);
             }
             if (array_key_exists('accepting_requests', $data)) {
                 DB::table('partner_profiles')->where('id', $pid)->update(['accepting_requests' => (bool) $data['accepting_requests']]);

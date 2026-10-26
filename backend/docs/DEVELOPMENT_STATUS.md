@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 79 passed (471 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 88 passed (512 assertions), exit=0 (setelah migrate:fresh).
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -15,6 +15,7 @@ Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 | Pengaduan (pasien/mitra) dan penanganan admin | TERUJI (lokal) | teks terenkripsi; kategori SAFETY hanya ditandai, aturan eskalasi NEEDS REVIEW klinis |
 | Data penawaran mitra (layanan, wilayah, jadwal) dan mesin pencocokan | TERUJI (lokal) | terhubung ke alur booking lewat penawaran otomatis |
 | Penawaran otomatis ke mitra layak, penolakan/kedaluwarsa berpindah ke mitra berikutnya, perintah bookings:expire-offers | TERUJI (lokal) | batas 10 menit adalah asumsi; jadwal otomatis baru terbukti di staging (belum ada cron); tanpa notifikasi |
+| Lokasi GPS pasien, titik dan radius layanan mitra, pencocokan terdekat, cek jangkauan, batas area pilot | TERUJI (lokal) | batas area pilot adalah PERKIRAAN, belum diverifikasi; UI peta belum dibuat; pelacakan mitra langsung belum ada |
 | Inventaris Data safety | DRAF | dari skema aktual; belum final, NEEDS REVIEW hukum; sisi aplikasi belum ada |
 | Pembayaran | TIDAK DIAKTIFKAN | menunggu keputusan bisnis/hukum |
 | Notifikasi | BELUM DIMULAI | |
@@ -58,3 +59,10 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - TERUJI (lokal): `partners:expire-sip` memakai tanggal WIB; SIP yang berakhir hari ini tetap ACTIVE, yang berakhir kemarin menjadi EXPIRED.
 - KEPUTUSAN SEMENTARA, belum disetujui pemilik: opsi override untuk `assign`; arti masa berlaku SIP (sampai dan termasuk tanggal berakhir).
 - Sembilan pemanggilan `assign` di `BookingFlowTest` kini memakai override, karena mitra di test itu tidak punya layanan, wilayah, atau jadwal.
+
+## Lokasi GPS (26 Okt 2026)
+- TERUJI (lokal): booking dapat menyertakan `latitude` dan `longitude` (terenkripsi); di luar area pilot ditolak 422 `OUT_OF_COVERAGE`; endpoint `GET /api/v1/coverage` memberi tahu apakah lokasi di area pilot dan berapa mitra aktif di sekitarnya. Detail: `docs/GPS_LOCATION.md`.
+- TERUJI (lokal): mitra mengatur titik dan radius layanan (`service_point`); pencocokan dengan GPS hanya memilih mitra yang radiusnya mencakup pasien, terdekat lebih dulu; mitra melihat jarak perkiraan, bukan koordinat.
+- ASUMSI sementara: titik tengah dan radius area pilot (Kabupaten Batu Bara) adalah perkiraan kasar saya, BELUM DIVERIFIKASI. Ganti lewat `TARAN_PILOT_LAT`, `TARAN_PILOT_LNG`, `TARAN_PILOT_RADIUS_KM` di `.env`.
+- Belum dibuat: UI peta dan pin, pelacakan posisi mitra langsung (EN_ROUTE), daftar tunggu untuk area di luar jangkauan.
+- NEEDS REVIEW (hukum): data lokasi pasien dan mitra; inventaris Data safety sudah ditambah.

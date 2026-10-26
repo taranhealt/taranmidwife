@@ -8,10 +8,11 @@ class Booking extends Model {
     use HasUlids;
     // status TIDAK mass-assignable: hanya berubah lewat BookingWorkflow.
     protected $fillable = ['code', 'patient_id', 'service_id', 'area_id', 'scheduled_start', 'price_amount',
-        'address_line', 'landmark', 'contact_phone', 'idempotency_key'];
+        'address_line', 'landmark', 'contact_phone', 'idempotency_key', 'patient_lat', 'patient_lng'];
     protected $attributes = ['status' => 'REQUESTED'];
     protected function casts(): array {
-        return ['scheduled_start' => 'datetime', 'address_line' => 'encrypted', 'contact_phone' => 'encrypted'];
+        return ['scheduled_start' => 'datetime', 'address_line' => 'encrypted', 'contact_phone' => 'encrypted',
+            'patient_lat' => 'encrypted', 'patient_lng' => 'encrypted'];
     }
     public function service(): BelongsTo { return $this->belongsTo(Service::class); }
     public function area(): BelongsTo { return $this->belongsTo(Area::class); }

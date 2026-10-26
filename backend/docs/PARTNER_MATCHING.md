@@ -20,3 +20,6 @@ Admin: `GET /api/v1/admin/bookings/{id}/candidates` (ops_admin) untuk booking RE
 - Tidak memakai lokasi GPS; hanya wilayah, layanan, jadwal, dan pemerataan.
 - Penugasan manual (`assign`) memeriksa kelayakan seperti di atas kecuali admin mengirim `override` beserta alasan (lihat `docs/MANUAL_ASSIGN.md`).
 - Akun mitra yang dihapus berstatus SUSPENDED, jadi tidak lolos pencocokan; baris penawarannya belum dibersihkan.
+
+## Dengan GPS (26 Okt 2026)
+Booking yang punya koordinat hanya dicocokkan dengan mitra yang radius layanannya mencakup lokasi pasien, terdekat lebih dulu. Lihat `docs/GPS_LOCATION.md`.

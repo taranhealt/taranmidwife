@@ -31,6 +31,7 @@ Route::prefix('v1')->group(function () {
         });
         Route::middleware(EnsureRole::class . ':patient')->group(function () {
             Route::post('bookings', [BookingController::class, 'store']);
+            Route::get('coverage', [\App\Http\Controllers\Api\CoverageController::class, 'check']);
             Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
         });
         Route::prefix('admin')->group(function () {

@@ -158,3 +158,8 @@ users.role (character varying)
 users.phone (character varying)
 users.status (character varying)
 ```
+
+## Koordinat lokasi (26 Okt 2026) - DRAF
+- `bookings.patient_lat`, `bookings.patient_lng`: lokasi pasien saat memesan; terenkripsi di basis data; tidak dikirim ke mitra (hanya jarak perkiraan); tidak dihapus oleh logika penghapusan akun yang ada (perlu ditinjau: koordinat belum ikut dianonimkan).
+- `partner_profiles.base_lat`, `base_lng`, `service_radius_km`: titik layanan yang dipilih mitra; tidak terenkripsi (dipakai di SQL); belum ikut dihapus saat mitra menghapus akun (perlu ditinjau).
+- NEEDS REVIEW (hukum): klasifikasi data lokasi, dasar pemrosesan, dan retensi.
