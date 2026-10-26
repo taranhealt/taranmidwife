@@ -1,16 +1,46 @@
 <?php
+use App\Http\Controllers\Api\AdminBookingController;
 use App\Http\Controllers\Api\AdminPartnerController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\CatalogController;
+use App\Http\Controllers\Api\MidwifeBookingController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('services', [CatalogController::class, 'services']);
+        Route::get('areas', [CatalogController::class, 'areas']);
+    });
     Route::post('auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
-        Route::prefix('admin')->middleware(EnsureRole::class . ':reviewer,sysadmin')->group(function () {
-            Route::get('partners', [AdminPartnerController::class, 'index']);
+
+        Route::middleware(EnsureRole::class . ':patient,partner,ops_admin,sysadmin')->group(function () {
+            Route::get('bookings', [BookingController::class, 'index']);
+            Route::get('bookings/{booking}', [BookingController::class, 'show']);
+        });
+        Route::middleware(EnsureRole::class . ':patient')->group(function () {
+            Route::post('bookings', [BookingController::class, 'store']);
+            Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
+        });
+        Route::prefix('admin')->group(function () {
+            Route::middleware(EnsureRole::class . ':reviewer,sysadmin')->group(function () {
+                Route::get('partners', [AdminPartnerController::class, 'index']);
+            });
+            Route::middleware(EnsureRole::class . ':ops_admin')->group(function () {
+                Route::post('bookings/{booking}/screen', [AdminBookingController::class, 'screen']);
+                Route::post('bookings/{booking}/assign', [AdminBookingController::class, 'assign']);
+                Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel']);
+            });
+        });
+        Route::prefix('midwife')->middleware(EnsureRole::class . ':partner')->group(function () {
+            Route::post('bookings/{booking}/accept', [MidwifeBookingController::class, 'accept']);
+            Route::post('bookings/{booking}/decline', [MidwifeBookingController::class, 'decline']);
+            Route::post('bookings/{booking}/start', [MidwifeBookingController::class, 'start']);
+            Route::post('bookings/{booking}/complete', [MidwifeBookingController::class, 'complete']);
         });
     });
 });
