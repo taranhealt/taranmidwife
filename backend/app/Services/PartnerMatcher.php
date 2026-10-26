@@ -20,7 +20,7 @@ class PartnerMatcher {
             ->where('pp.verification_status', 'ACTIVE')
             ->where('pp.accepting_requests', true)
             ->whereNotNull('pp.sip_expires_on')
-            ->where('pp.sip_expires_on', '>', Carbon::now(self::TZ)->toDateString())
+            ->whereRaw("pp.sip_expires_on >= (select (bk.scheduled_start at time zone 'Asia/Jakarta')::date from bookings bk where bk.id = ?)", [$b->id])
             ->whereExists(fn ($s) => $s->select(DB::raw(1))->from('partner_services as ps')
                 ->whereColumn('ps.partner_profile_id', 'pp.id')->where('ps.service_id', $b->service_id))
             ->whereExists(fn ($s) => $s->select(DB::raw(1))->from('partner_areas as pa')

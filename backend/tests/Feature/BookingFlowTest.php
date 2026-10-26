@@ -80,7 +80,7 @@ class BookingFlowTest extends TestCase {
         $patient = $this->user(UserRole::Patient); $ops = $this->user(UserRole::OpsAdmin); $partner = $this->partner();
         $id = $this->create($patient)->json('data.id');
         $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/screen")->assertOk()->assertJsonPath('data.status', 'WAITING_MIDWIFE');
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id])->assertOk()->assertJsonPath('data.status', 'OFFERED');
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])->assertOk()->assertJsonPath('data.status', 'OFFERED');
         $this->actingAs($partner, 'sanctum')->getJson("/api/v1/bookings/{$id}")->assertOk()->assertJsonMissingPath('data.address_line');
         $this->actingAs($partner, 'sanctum')->postJson("/api/v1/midwife/bookings/{$id}/accept")->assertOk()->assertJsonPath('data.status', 'CONFIRMED')->assertJsonPath('data.address_line', 'Jl. Uji No. 1 (data sintetis)');
         $this->actingAs($partner, 'sanctum')->postJson("/api/v1/midwife/bookings/{$id}/start")->assertOk()->assertJsonPath('data.status', 'IN_PROGRESS');
@@ -91,7 +91,7 @@ class BookingFlowTest extends TestCase {
     public function test_invalid_transitions_rejected_by_backend(): void {
         $patient = $this->user(UserRole::Patient); $ops = $this->user(UserRole::OpsAdmin); $partner = $this->partner();
         $id = $this->create($patient)->json('data.id');
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id])
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])
             ->assertStatus(409)->assertJsonPath('code', 'INVALID_TRANSITION');
         $this->assertSame('REQUESTED', Booking::find($id)->status);
         $this->assertDatabaseCount('assignments', 0);
@@ -101,20 +101,20 @@ class BookingFlowTest extends TestCase {
         $p1 = $this->user(UserRole::Patient); $p2 = $this->user(UserRole::Patient);
         $id1 = $this->create($p1)->json('data.id'); $id2 = $this->create($p2)->json('data.id');
         foreach ([$id1, $id2] as $id) { $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/screen")->assertOk(); }
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id1}/assign", ['partner_id' => $partner->id])->assertOk();
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id2}/assign", ['partner_id' => $partner->id])
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id1}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])->assertOk();
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id2}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])
             ->assertStatus(409)->assertJsonPath('code', 'SLOT_UNAVAILABLE');
         $this->assertSame('WAITING_MIDWIFE', Booking::find($id2)->status);
         $this->actingAs($p1, 'sanctum')->postJson("/api/v1/bookings/{$id1}/cancel")->assertOk()->assertJsonPath('data.status', 'CANCELLED');
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id2}/assign", ['partner_id' => $partner->id])->assertOk();
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id2}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])->assertOk();
     }
     public function test_decline_returns_to_waiting_and_frees_slot(): void {
         $ops = $this->user(UserRole::OpsAdmin); $partner = $this->partner();
         $id = $this->create($this->user(UserRole::Patient))->json('data.id');
         $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/screen")->assertOk();
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id])->assertOk();
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])->assertOk();
         $this->actingAs($partner, 'sanctum')->postJson("/api/v1/midwife/bookings/{$id}/decline")->assertOk()->assertJsonPath('data.status', 'WAITING_MIDWIFE');
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id])->assertOk();
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])->assertOk();
     }
     public function test_only_active_partner_can_be_assigned_or_accept(): void {
         $ops = $this->user(UserRole::OpsAdmin);
@@ -126,7 +126,7 @@ class BookingFlowTest extends TestCase {
         }
         $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $this->user(UserRole::Patient)->id])->assertStatus(422);
         $partner = $this->partner();
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id])->assertOk();
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])->assertOk();
         $partner->partnerProfile()->update(['verification_status' => 'SUSPENDED']);
         $this->actingAs($partner->fresh(), 'sanctum')->postJson("/api/v1/midwife/bookings/{$id}/accept")->assertStatus(403)->assertJsonPath('code', 'PARTNER_NOT_ACTIVE');
     }
@@ -134,7 +134,7 @@ class BookingFlowTest extends TestCase {
         $ops = $this->user(UserRole::OpsAdmin); $partner = $this->partner(); $other = $this->partner();
         $id = $this->create($this->user(UserRole::Patient))->json('data.id');
         $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/screen")->assertOk();
-        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id])->assertOk();
+        $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$id}/assign", ['partner_id' => $partner->id, 'override' => true, 'override_reason' => 'uji'])->assertOk();
         $this->actingAs($other, 'sanctum')->postJson("/api/v1/midwife/bookings/{$id}/accept")->assertStatus(404);
         $this->actingAs($other, 'sanctum')->getJson("/api/v1/bookings/{$id}")->assertStatus(404);
     }

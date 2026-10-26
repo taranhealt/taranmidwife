@@ -9,7 +9,7 @@ class ExpirePartnerSip extends Command {
     protected $description = 'Ubah mitra ACTIVE dengan SIP kedaluwarsa menjadi EXPIRED';
     public function handle(PartnerVerificationWorkflow $wf): int {
         $n = 0;
-        PartnerProfile::where('verification_status', 'ACTIVE')->whereDate('sip_expires_on', '<', today())
+        PartnerProfile::where('verification_status', 'ACTIVE')->whereDate('sip_expires_on', '<', \Illuminate\Support\Carbon::now('Asia/Jakarta')->toDateString())
             ->pluck('id')->each(function ($id) use ($wf, &$n) {
                 DB::transaction(function () use ($id, $wf, &$n) {
                     $p = PartnerProfile::where('id', $id)->lockForUpdate()->first();

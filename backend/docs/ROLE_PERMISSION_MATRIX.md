@@ -18,3 +18,4 @@ Asumsi sementara: peran "approver" belum ada; keputusan persetujuan mitra akan d
 ## Penawaran mitra
 - partner: kelola layanan, wilayah, jadwal, dan saklar menerima permintaan milik sendiri.
 - ops_admin: lihat kandidat mitra untuk booking. Peran lain tidak.
+- ops_admin: dapat menugaskan mitra yang tidak lolos kriteria hanya dengan `override` dan alasan tercatat.

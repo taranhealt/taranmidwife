@@ -6,7 +6,7 @@ Mitra (`/api/v1/midwife/offerings`, GET dan PUT; PUT bersifat parsial, kunci yan
 - `accepting_requests`: saklar menerima permintaan.
 
 Mesin pencocokan (`App\Services\PartnerMatcher`). Mitra layak bila:
-- akun aktif, verifikasi ACTIVE, SIP belum kedaluwarsa, `accepting_requests` benar;
+- akun aktif, verifikasi ACTIVE, SIP berlaku sampai tanggal kunjungan (dihitung WIB), `accepting_requests` benar;
 - melayani layanan dan wilayah booking;
 - tersedia pada hari dan jam booking (dihitung WIB dari waktu tersimpan);
 - tidak punya penugasan aktif pada slot yang sama;
@@ -18,5 +18,5 @@ Admin: `GET /api/v1/admin/bookings/{id}/candidates` (ops_admin) untuk booking RE
 ## Belum ada / catatan
 - Terhubung ke alur booking lewat OfferDispatcher (lihat `docs/AUTO_OFFER.md`); `last_offered_at` diperbarui saat penawaran.
 - Tidak memakai lokasi GPS; hanya wilayah, layanan, jadwal, dan pemerataan.
-- Penugasan manual (`assign`) belum memeriksa kelayakan seperti di atas.
+- Penugasan manual (`assign`) memeriksa kelayakan seperti di atas kecuali admin mengirim `override` beserta alasan (lihat `docs/MANUAL_ASSIGN.md`).
 - Akun mitra yang dihapus berstatus SUSPENDED, jadi tidak lolos pencocokan; baris penawarannya belum dibersihkan.

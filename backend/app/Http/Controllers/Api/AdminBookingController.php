@@ -26,7 +26,11 @@ class AdminBookingController extends Controller {
     }
     public function assign(Request $request, string $booking, BookingWorkflow $wf): JsonResponse {
         $user = $request->user();
-        $data = $request->validate(['partner_id' => ['required', 'integer']]);
+        $data = $request->validate([
+            'partner_id' => ['required', 'integer'],
+            'override' => ['sometimes', 'boolean'],
+            'override_reason' => ['required_if_accepted:override', 'nullable', 'string', 'max:200'],
+        ]);
         try {
             $b = DB::transaction(function () use ($booking, $data, $user, $wf) {
                 $b = Booking::where('id', $booking)->lockForUpdate()->firstOrFail();
@@ -35,7 +39,17 @@ class AdminBookingController extends Controller {
                     || $partner->partnerProfile?->verification_status !== PartnerVerificationStatus::Active) {
                     throw ValidationException::withMessages(['partner_id' => 'Mitra tidak aktif atau belum terverifikasi.']);
                 }
-                $wf->transition($b, 'OFFERED', $user->id);
+                $wf->transition($b, 'OFFERED', $user->id, ! empty($data['override'])
+                    ? 'Override: ' . \Illuminate\Support\Str::limit((string) $data['override_reason'], 80, '') : null);
+                if (empty($data['override'])) {
+                    $eligible = collect(app(\App\Services\PartnerMatcher::class)->candidates($b))
+                        ->contains(fn ($c) => $c['partner_id'] === (int) $partner->id);
+                    if (! $eligible) {
+                        throw ValidationException::withMessages(['partner_id' => 'Mitra tidak memenuhi kriteria (layanan, wilayah, jadwal, ketersediaan). Kirim override beserta alasan bila tetap ingin menugaskan.']);
+                    }
+                } else {
+                    \App\Models\AuditEvent::record('booking.assign_override', $user->id, 'booking', $b->id, 'success');
+                }
                 Assignment::create(['booking_id' => $b->id, 'partner_id' => $partner->id,
                     'scheduled_start' => $b->scheduled_start, 'active' => true]);
                 return $b;

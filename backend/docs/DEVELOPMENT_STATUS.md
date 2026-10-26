@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 70 passed (445 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 79 passed (471 assertions), exit=0 (setelah migrate:fresh).
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -43,17 +43,18 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - Model penugasan: hibrida. Pasien mengajukan; admin menyaring (sementara, sampai protokol klinis ada); sistem menawarkan otomatis ke satu mitra layak per waktu, mirip aplikasi ojek online; admin tetap dapat menugaskan manual. Dokumen konteks bagian 9 menggambarkan pasien memilih bidan; perbedaan ini belum direkonsiliasi penuh.
 - ASUMSI sementara (belum diputuskan): batas waktu mitra menjawab tawaran 10 menit; pemilihan mitra tanpa GPS (wilayah, layanan, jadwal, pemerataan).
 - Belum dibangun: notifikasi ke mitra, profil publik bidan, pencarian bidan oleh pasien.
-- Temuan: penugasan manual admin (`assign`) hanya memeriksa status mitra, belum memeriksa layanan, wilayah, atau jadwal. Inventaris Data safety belum memuat tabel penawaran mitra (perbarui).
 - Zona waktu sesi database semula bukan UTC, sehingga waktu booking (disimpan sebagai UTC) berisiko bergeser. Koneksi pgsql kini diset `timezone => UTC`. Data lokal lama dibuat ulang lewat migrate:fresh; pastikan server staging/produksi memakai pengaturan yang sama.
 
 ## Penawaran otomatis (26 Okt 2026)
 - Saat admin menyaring booking, sistem menawarkan ke kandidat teratas (`OfferDispatcher`). Tanpa kandidat, status tetap WAITING_MIDWIFE. Detail: `docs/AUTO_OFFER.md`.
-- Belum diperiksa: `assign` manual admin belum memeriksa kelayakan mitra (layanan, wilayah, jadwal); menunggu pembacaan `BookingFlowTest` agar test lama tidak rusak.
-- Belum diperiksa: apakah daftar booking milik mitra (`GET /bookings`) menampilkan tawaran berstatus OFFERED.
 
 ## Tindak lanjut penawaran (26 Okt 2026)
 - TERUJI (lokal): `accept` menolak tawaran otomatis yang sudah lewat batas (409 OFFER_EXPIRED), walau perintah kedaluwarsa belum berjalan.
-- Keputusan pemilik tertunda: apakah `assign` manual wajib memeriksa kelayakan (layanan, wilayah, jadwal) atau boleh menimpa dengan alasan tercatat. Mengubahnya memengaruhi 6 test lama di BookingFlowTest.
-- Keputusan pemilik tertunda: arti "SIP berlaku sampai tanggal". Pencocokan menganggap tidak valid pada tanggal berakhirnya; `partners:expire-sip` baru mengubah status setelahnya.
-- Temuan: `partners:expire-sip` memakai `today()` berzona UTC, sehingga status EXPIRED terlambat sekitar satu hari terhadap tanggal WIB. Belum diperbaiki.
-- Belum diperiksa: cakupan `BookingController::scoped` untuk mitra (apakah daftar booking mitra memuat tawaran OFFERED).
+
+## Penugasan manual dan SIP (26 Okt 2026)
+- TERUJI (lokal): `assign` manual memeriksa kelayakan mitra (layanan, wilayah, jadwal, ketersediaan, SIP). Mitra tidak layak ditolak 422, kecuali admin mengirim `override: true` dan `override_reason`; override dicatat di audit (`booking.assign_override`) dan riwayat status. Detail: `docs/MANUAL_ASSIGN.md`.
+- TERUJI (lokal): mitra melihat tawaran (OFFERED) di daftar booking tanpa alamat dan telepon; kontak baru terbuka setelah CONFIRMED.
+- TERUJI (lokal): pencocokan menerima mitra yang SIP-nya berlaku sampai dan termasuk tanggal kunjungan (WIB) dan menolak yang habis sebelumnya.
+- TERUJI (lokal): `partners:expire-sip` memakai tanggal WIB; SIP yang berakhir hari ini tetap ACTIVE, yang berakhir kemarin menjadi EXPIRED.
+- KEPUTUSAN SEMENTARA, belum disetujui pemilik: opsi override untuk `assign`; arti masa berlaku SIP (sampai dan termasuk tanggal berakhir).
+- Sembilan pemanggilan `assign` di `BookingFlowTest` kini memakai override, karena mitra di test itu tidak punya layanan, wilayah, atau jadwal.
