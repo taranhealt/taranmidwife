@@ -33,6 +33,11 @@ class MidwifeBookingController extends Controller {
         return response()->json(['data' => BookingPresenter::present($b->load(['service', 'area']), $user)]);
     }
     public function accept(Request $request, string $booking, BookingWorkflow $wf): JsonResponse {
+        $expired = Assignment::where('booking_id', $booking)->where('partner_id', $request->user()->id)
+            ->where('active', true)->where('auto_offered', true)->where('offer_expires_at', '<', now())->exists();
+        if ($expired) {
+            return response()->json(['code' => 'OFFER_EXPIRED', 'message' => 'Tawaran sudah kedaluwarsa.'], 409);
+        }
         return $this->run($request, $booking, 'CONFIRMED', $wf, true, fn ($b) =>
             Assignment::where('booking_id', $b->id)->where('active', true)->update(['accepted_at' => now()]));
     }

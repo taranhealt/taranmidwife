@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 66 passed (436 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 70 passed (445 assertions), exit=0 (setelah migrate:fresh).
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -50,3 +50,10 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - Saat admin menyaring booking, sistem menawarkan ke kandidat teratas (`OfferDispatcher`). Tanpa kandidat, status tetap WAITING_MIDWIFE. Detail: `docs/AUTO_OFFER.md`.
 - Belum diperiksa: `assign` manual admin belum memeriksa kelayakan mitra (layanan, wilayah, jadwal); menunggu pembacaan `BookingFlowTest` agar test lama tidak rusak.
 - Belum diperiksa: apakah daftar booking milik mitra (`GET /bookings`) menampilkan tawaran berstatus OFFERED.
+
+## Tindak lanjut penawaran (26 Okt 2026)
+- TERUJI (lokal): `accept` menolak tawaran otomatis yang sudah lewat batas (409 OFFER_EXPIRED), walau perintah kedaluwarsa belum berjalan.
+- Keputusan pemilik tertunda: apakah `assign` manual wajib memeriksa kelayakan (layanan, wilayah, jadwal) atau boleh menimpa dengan alasan tercatat. Mengubahnya memengaruhi 6 test lama di BookingFlowTest.
+- Keputusan pemilik tertunda: arti "SIP berlaku sampai tanggal". Pencocokan menganggap tidak valid pada tanggal berakhirnya; `partners:expire-sip` baru mengubah status setelahnya.
+- Temuan: `partners:expire-sip` memakai `today()` berzona UTC, sehingga status EXPIRED terlambat sekitar satu hari terhadap tanggal WIB. Belum diperbaiki.
+- Belum diperiksa: cakupan `BookingController::scoped` untuk mitra (apakah daftar booking mitra memuat tawaran OFFERED).

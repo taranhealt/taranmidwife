@@ -10,7 +10,7 @@ Alur:
 
 ## Belum ada / catatan
 - Batas 10 menit adalah ASUMSI sementara, belum keputusan pemilik.
-- Kedaluwarsa hanya diproses oleh perintah terjadwal. Cron untuk `schedule:run` belum ada, jadi di luar test hal ini belum terbukti berjalan. Sampai perintah berjalan, mitra masih dapat menerima tawaran yang sudah lewat batas.
+- Kedaluwarsa hanya diproses oleh perintah terjadwal. Cron untuk `schedule:run` belum ada, jadi di luar test hal ini belum terbukti berjalan. Menerima tawaran yang sudah lewat batas ditolak (409 OFFER_EXPIRED) walau perintah belum berjalan.
 - Tidak ada notifikasi ke mitra; mitra harus membuka aplikasi.
 - Tindakan sistem tercatat dengan actor kosong (null).
 - Booking WAITING_MIDWIFE yang dikelola manual juga ikut disapu perintah ini.
