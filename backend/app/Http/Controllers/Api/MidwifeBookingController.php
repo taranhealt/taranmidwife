@@ -37,7 +37,7 @@ class MidwifeBookingController extends Controller {
             Assignment::where('booking_id', $b->id)->where('active', true)->update(['accepted_at' => now()]));
     }
     public function decline(Request $request, string $booking, BookingWorkflow $wf): JsonResponse {
-        return $this->run($request, $booking, 'WAITING_MIDWIFE', $wf, false, fn ($b) => $wf->releaseAssignment($b));
+        return $this->run($request, $booking, 'WAITING_MIDWIFE', $wf, false, fn ($b) => app(\App\Services\OfferDispatcher::class)->afterDecline($b));
     }
     public function start(Request $request, string $booking, BookingWorkflow $wf): JsonResponse {
         return $this->run($request, $booking, 'IN_PROGRESS', $wf, true);

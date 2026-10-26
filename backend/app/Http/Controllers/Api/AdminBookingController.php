@@ -19,6 +19,7 @@ class AdminBookingController extends Controller {
         $b = DB::transaction(function () use ($booking, $user, $wf) {
             $b = Booking::where('id', $booking)->lockForUpdate()->firstOrFail();
             $wf->transition($b, 'WAITING_MIDWIFE', $user->id, 'Pemeriksaan administratif selesai');
+            app(\App\Services\OfferDispatcher::class)->offerNext($b);
             return $b;
         });
         return response()->json(['data' => BookingPresenter::present($b->load(['service', 'area']), $user)]);

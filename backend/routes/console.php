@@ -8,3 +8,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 \Illuminate\Support\Facades\Schedule::command('partners:expire-sip')->dailyAt('00:10')->timezone('Asia/Jakarta');
+\Illuminate\Support\Facades\Schedule::command('bookings:expire-offers')->everyMinute();
