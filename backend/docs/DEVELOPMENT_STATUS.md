@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 114 passed (644 assertions), exit=0 (setelah migrate:fresh).
+Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 118 passed (662 assertions), exit=0.
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -99,3 +99,10 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - DRAF (bukan hukum final): halaman `/kebijakan-privasi`, berisi data yang memang dikumpulkan kode dan penanda [ISI] atau [KEPUTUSAN] untuk bagian yang belum ada. NEEDS REVIEW (hukum): seluruh isi, retensi, hak pengguna, dan pihak ketiga.
 - Belum ada: pengiriman email sungguhan (MAIL_MAILER=log; penyedia email dipilih saat staging), tautan kebijakan privasi di semua halaman, pengaturan ulang kata sandi lewat aplikasi seluler.
 - Hasil uji: 114 passed (644 assertions).
+
+## UI Admin (27 Okt 2026)
+- TERUJI (lokal, otomatis): halaman `/admin` termuat tanpa sumber luar; `GET /bookings` mendukung filter `status`; `activate` mitra memakai tanggal WIB (SIP berakhir hari ini masih sah, kemarin ditolak).
+- BELUM DIUJI otomatis: perilaku JavaScript UI Admin (login staf, tab menurut peran, antrean pesanan, daftar kandidat, tugaskan, batalkan, dokumen mitra, pemeriksaan lima butir, tindakan verifikasi). Perlu uji manual di ponsel; tombol tindakan mitra mengikuti perkiraan transisi status dan server tetap penentu. Detail: `docs/ADMIN_UI.md`.
+- Belum ada di UI: tab pengaduan (API sudah ada), override `assign` (hanya lewat API), pencarian dan halaman lanjutan (daftar dibatasi 50 terbaru).
+- Server uji lokal TaranMidwife memakai port 8010 dan dibuka lewat localhost; port 8000 dipakai aplikasi lain di perangkat ini. Lihat `docs/LOCAL_RUN.md`.
+- Hasil uji: 118 passed (662 assertions). Kali ini tanpa migrate:fresh (tidak ada perubahan skema) agar akun demo di basis data lokal tidak terhapus.

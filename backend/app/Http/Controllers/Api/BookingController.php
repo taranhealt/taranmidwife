@@ -33,6 +33,7 @@ class BookingController extends Controller {
         $user = $request->user();
         $perPage = min(max((int) $request->query('per_page', 20), 1), 50);
         $page = self::scoped($user)->with(['service:id,name', 'area:id,name'])
+            ->when($request->filled('status'), fn ($q) => $q->where('status', (string) $request->query('status')))
             ->orderByDesc('created_at')->paginate($perPage);
         return response()->json($page->through(fn ($b) => BookingPresenter::present($b, $user)));
     }

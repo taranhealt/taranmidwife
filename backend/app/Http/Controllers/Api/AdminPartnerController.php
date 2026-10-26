@@ -101,7 +101,7 @@ class AdminPartnerController extends Controller {
     public function activate(Request $request, string $partner, PartnerVerificationWorkflow $wf): JsonResponse {
         return $this->act($request, $partner, function ($p, $u) use ($wf) {
             $wf->assertAllowed($p, 'ACTIVE');
-            if (! $p->sip_expires_on || ! $p->sip_expires_on->gt(today())) {
+            if (! $p->sip_expires_on || $p->sip_expires_on->toDateString() < \Illuminate\Support\Carbon::now('Asia/Jakarta')->toDateString()) {
                 abort(response()->json(['code' => 'SIP_NOT_VALID', 'message' => 'SIP belum diisi atau sudah kedaluwarsa.'], 422));
             }
             $wf->transition($p, 'ACTIVE', $u->id);

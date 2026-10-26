@@ -1,0 +1,9 @@
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.tabs button { flex: 1 1 auto; }
+.tabs button.active { background: var(--navy); color: #fff; }
+dl.kv { display: grid; grid-template-columns: 130px 1fr; gap: 4px 8px; font-size: 14px; margin: 8px 0; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; word-break: break-word; }
+img.doc { max-width: 100%; border: 1px solid var(--line); border-radius: 8px; margin-top: 8px; }
+.warnbox { border: 1px solid var(--warn); color: var(--warn); padding: 8px 10px; border-radius: 8px; font-size: 13px; margin-top: 8px; }
+.chk-row { margin-top: 8px; }
