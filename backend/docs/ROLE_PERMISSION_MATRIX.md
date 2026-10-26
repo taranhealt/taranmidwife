@@ -1,0 +1,11 @@
+# Matriks peran (sesuai Final MVP Spec v1.0)
+
+| Peran | Boleh | Tidak boleh |
+|---|---|---|
+| patient | buat/lihat/batalkan booking milik sendiri | booking pasien lain, endpoint admin/mitra |
+| partner | lihat dan proses penugasan miliknya (hanya jika ACTIVE) | booking lain; alamat/telepon sebelum CONFIRMED |
+| ops_admin | screening, penugasan, pembatalan, lihat semua booking | daftar verifikasi mitra |
+| reviewer | daftar mitra untuk verifikasi | booking pasien |
+| sysadmin | daftar mitra, lihat booking (tanpa alamat/telepon) | menugaskan/menyaring booking |
+
+Asumsi sementara: peran "approver" belum ada; keputusan persetujuan mitra akan dipegang sysadmin sampai pemilik menetapkan.
