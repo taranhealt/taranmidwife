@@ -19,6 +19,11 @@ Route::prefix('v1')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::delete('me', [\App\Http\Controllers\Api\AccountController::class, 'destroy'])->middleware('throttle:5,1');
+        Route::middleware(\App\Http\Middleware\EnsureRole::class . ':patient,partner')->group(function () {
+            Route::post('complaints', [\App\Http\Controllers\Api\ComplaintController::class, 'store'])->middleware('throttle:10,1');
+            Route::get('complaints', [\App\Http\Controllers\Api\ComplaintController::class, 'index']);
+            Route::get('complaints/{complaint}', [\App\Http\Controllers\Api\ComplaintController::class, 'show']);
+        });
 
         Route::middleware(EnsureRole::class . ':patient,partner,ops_admin,sysadmin')->group(function () {
             Route::get('bookings', [BookingController::class, 'index']);
@@ -29,6 +34,16 @@ Route::prefix('v1')->group(function () {
             Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
         });
         Route::prefix('admin')->group(function () {
+            Route::middleware(\App\Http\Middleware\EnsureRole::class . ':ops_admin,reviewer,sysadmin')->group(function () {
+                Route::get('complaints', [\App\Http\Controllers\Api\AdminComplaintController::class, 'index']);
+                Route::get('complaints/{complaint}', [\App\Http\Controllers\Api\AdminComplaintController::class, 'show']);
+            });
+            Route::middleware(\App\Http\Middleware\EnsureRole::class . ':ops_admin,reviewer')->group(function () {
+                Route::post('complaints/{complaint}/start-review', [\App\Http\Controllers\Api\AdminComplaintController::class, 'startReview']);
+                Route::post('complaints/{complaint}/resolve', [\App\Http\Controllers\Api\AdminComplaintController::class, 'resolve']);
+                Route::post('complaints/{complaint}/close', [\App\Http\Controllers\Api\AdminComplaintController::class, 'close']);
+                Route::post('complaints/{complaint}/reopen', [\App\Http\Controllers\Api\AdminComplaintController::class, 'reopen']);
+            });
             Route::middleware(EnsureRole::class . ':reviewer,sysadmin')->group(function () {
                 Route::get('partners', [AdminPartnerController::class, 'index']);
                 Route::get('partners/{partner}', [AdminPartnerController::class, 'show']);

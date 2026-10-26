@@ -9,3 +9,8 @@
 | sysadmin | daftar mitra, lihat booking (tanpa alamat/telepon) | menugaskan/menyaring booking |
 
 Asumsi sementara: peran "approver" belum ada; keputusan persetujuan mitra akan dipegang sysadmin sampai pemilik menetapkan.
+
+## Pengaduan
+- patient, partner: ajukan dan lihat pengaduan milik sendiri (booking terkait saja).
+- ops_admin, reviewer: lihat dan tangani semua pengaduan.
+- sysadmin: lihat saja.
