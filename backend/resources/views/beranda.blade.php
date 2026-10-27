@@ -35,14 +35,14 @@ footer a{color:var(--blue);margin-right:14px}
 <main><div class="wrap">
 <div class="notice" role="note"><strong>Tahap uji coba.</strong> Layanan belum dibuka untuk pasien nyata. Data yang tampil adalah data contoh.</div>
 <div class="cards">
-<section class="card"><h2>Untuk pasien</h2><p>Lihat layanan dan wilayah, lalu ajukan permintaan kunjungan. Jadwal belum final sampai dikonfirmasi.</p><a class="btn" href="{{ url('/app') }}">Buka aplikasi pasien</a></section>
-<section class="card"><h2>Untuk bidan mitra</h2><p>Daftar sebagai mitra, atur wilayah dan jadwal, serta kelola permintaan kunjungan. Mitra baru aktif setelah verifikasi.</p><a class="btn alt" href="{{ url('/mitra') }}">Buka aplikasi mitra</a></section>
+<section class="card"><h2>Untuk pasien</h2><p>Lihat layanan dan wilayah, lalu ajukan permintaan kunjungan. Jadwal belum final sampai dikonfirmasi.</p><a class="btn" href="/app">Buka aplikasi pasien</a></section>
+<section class="card"><h2>Untuk bidan mitra</h2><p>Daftar sebagai mitra, atur wilayah dan jadwal, serta kelola permintaan kunjungan. Mitra baru aktif setelah verifikasi.</p><a class="btn alt" href="/mitra">Buka aplikasi mitra</a></section>
 </div>
 <div class="info"><strong>Penting:</strong> TaranMidwife bukan layanan gawat darurat. Jika terjadi kondisi darurat, segera hubungi layanan gawat darurat atau fasilitas kesehatan terdekat, jangan menunggu balasan aplikasi.</div>
 </div></main>
 <footer><div class="wrap">
-<a href="{{ url('/kebijakan-privasi') }}">Kebijakan Privasi</a>
-<a href="{{ url('/hapus-akun') }}">Hapus Akun</a>
+<a href="/kebijakan-privasi">Kebijakan Privasi</a>
+<a href="/hapus-akun">Hapus Akun</a>
 <p>PT Taran Rainmaker Group</p>
 </div></footer>
 </body>

@@ -10,3 +10,4 @@ build/
 *.jks
 *.keystore
 key.properties
+!.env.production.example

@@ -1,7 +1,7 @@
 # DEVELOPMENT STATUS - TaranMidwife
 
 Diperbarui: 26 Okt 2026. Dasar: commit 6f0f7ae (34 test lulus).
-Bukti: `php artisan test` di Termux (aarch64), PHP 8.5.1, Laravel 13.38.0, PostgreSQL 18.2: 118 passed (662 assertions), exit=0.
+Bukti: php artisan test di Termux (PostgreSQL lokal): Tests:    122 passed (688 assertions)
 Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 
 | Komponen | Status | Catatan |
@@ -23,7 +23,7 @@ Lingkungan: HANYA lokal. Tidak ada staging/produksi.
 | Inventaris Data safety | DRAF | dari skema aktual; belum final, NEEDS REVIEW hukum; sisi aplikasi belum ada |
 | Pembayaran | TIDAK DIAKTIFKAN | menunggu keputusan bisnis/hukum |
 | Notifikasi | BELUM DIMULAI | |
-| Dashboard admin web | BELUM DIMULAI | |
+| Dashboard admin web di /admin: pesanan, kandidat, tugaskan, verifikasi mitra | DRAF (halaman diuji dimuat; interaksi di browser BELUM diuji) | |
 | Aplikasi Flutter pasien dan mitra | BELUM DIMULAI | Flutter belum terpasang di Termux |
 | Deployment, HTTPS, backup | BELUM DIMULAI | |
 | Kepatuhan hukum/klinis | NEEDS REVIEW | tidak dinyatakan terpenuhi |
@@ -106,3 +106,8 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - Belum ada di UI: tab pengaduan (API sudah ada), override `assign` (hanya lewat API), pencarian dan halaman lanjutan (daftar dibatasi 50 terbaru).
 - Server uji lokal TaranMidwife memakai port 8010 dan dibuka lewat localhost; port 8000 dipakai aplikasi lain di perangkat ini. Lihat `docs/LOCAL_RUN.md`.
 - Hasil uji: 118 passed (662 assertions). Kali ini tanpa migrate:fresh (tidak ada perubahan skema) agar akun demo di basis data lokal tidak terhapus.
+
+## Pembaruan deployment (26 Okt 2026)
+- Header keamanan HTTP, HTTPS dipaksa di production, template env production, skrip backup dan uji restore: TERUJI (lokal). Satu latihan backup lalu restore ke database sementara berhasil; belum ada backup terjadwal di server.
+- Deployment publik (hosting, domain, HTTPS, cron): BELUM DIMULAI; menunggu keputusan pemilik (penyedia, biaya).
+- Rilis Google Play: NO-GO. Lihat docs/PLAY_RELEASE_STATUS.md. Aplikasi Android (Flutter) belum ada; build AAB di lingkungan selain Termux.
