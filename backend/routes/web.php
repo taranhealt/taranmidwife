@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('beranda');
 });
 Route::get('/app', fn () => view('patient'))->name('patient.app');
 Route::get('/mitra', fn () => view('mitra'))->name('partner.app');
