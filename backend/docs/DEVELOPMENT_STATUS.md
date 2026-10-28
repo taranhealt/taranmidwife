@@ -111,3 +111,6 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 - Header keamanan HTTP, HTTPS dipaksa di production, template env production, skrip backup dan uji restore: TERUJI (lokal). Satu latihan backup lalu restore ke database sementara berhasil; belum ada backup terjadwal di server.
 - Deployment publik (hosting, domain, HTTPS, cron): BELUM DIMULAI; menunggu keputusan pemilik (penyedia, biaya).
 - Rilis Google Play: NO-GO. Lihat docs/PLAY_RELEASE_STATUS.md. Aplikasi Android (Flutter) belum ada; build AAB di lingkungan selain Termux.
+
+- Catatan: latihan restore (27 Okt 2026) dijalankan pada database dev yang kosong (users=0). Ini membuktikan skema dan prosedur pulih, bukan integritas data nyata.
+- CI GitHub (backend) ditulis; BELUM terbukti sampai dijalankan di GitHub.
