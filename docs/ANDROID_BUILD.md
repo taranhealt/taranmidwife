@@ -71,3 +71,7 @@ Before enabling a signed AAB workflow, add a dedicated workflow step that decode
 ## Bootstrap workflow safety
 
 The manual Android bootstrap workflow is verification-only. It does not generate files, stage changes, commit, or push to the default branch.
+
+### CI runner and action versions
+
+The Android CI and verification workflows use `ubuntu-24.04`. Java is provisioned with `actions/setup-java@v5` (Temurin 17); checkout uses `actions/checkout@v5`; uploaded build artifacts use `actions/upload-artifact@v5`. These major versions use the Node 24 action runtime rather than the retired Node 20 runtime. Keep the Flutter SDK pin in the shared composite action. The feature branch is validated through the open pull request; avoid duplicate push and pull-request workflow triggers for the same branch.
