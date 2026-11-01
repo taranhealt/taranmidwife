@@ -107,6 +107,43 @@ class _BookingSheetState extends State<_BookingSheet> {
   bool _busy = false;
   String? _error;
 
+  Future<void> _reportComplaint() async {
+    final report = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => const _ComplaintDialog(),
+    );
+    if (report == null || !mounted) return;
+    setState(() { _busy = true; _error = null; });
+    try {
+      final result = await context.read<ApiClient>().send(
+        'POST',
+        '/complaints',
+        body: {
+          'booking_id': widget.booking.id,
+          'category': report['category'],
+          'description': report['description'],
+        },
+      );
+      if (!mounted) return;
+      final notice = result['notice'] as String?;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Pengaduan terkirim'),
+          content: Text(notice ?? 'Pengaduan Anda telah diterima dan akan ditinjau.'),
+          actions: [TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Tutup'),
+          )],
+        ),
+      );
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.displayMessage);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _cancel() async {
     final reason = await showDialog<String>(context: context, builder: (_) => const _CancelDialog());
     if (reason == null || !mounted) return;
@@ -157,6 +194,15 @@ class _BookingSheetState extends State<_BookingSheet> {
               const SizedBox(height: 8),
               Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ],
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _busy ? null : _reportComplaint,
+                icon: const Icon(Icons.flag_outlined),
+                label: const Text('Laporkan masalah layanan'),
+              ),
+            ),
             if (cancellableStatuses.contains(b.status)) ...[
               const SizedBox(height: 12),
               SizedBox(
@@ -204,6 +250,84 @@ class _CancelDialogState extends State<_CancelDialog> {
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_reason.text.trim()),
           child: const Text('Batalkan pesanan'),
+        ),
+      ],
+    );
+  }
+}
+
+
+class _ComplaintDialog extends StatefulWidget {
+  const _ComplaintDialog();
+
+  @override
+  State<_ComplaintDialog> createState() => _ComplaintDialogState();
+}
+
+class _ComplaintDialogState extends State<_ComplaintDialog> {
+  final _description = TextEditingController();
+  String _category = 'SERVICE_QUALITY';
+
+  static const _categories = <String, String>{
+    'SERVICE_QUALITY': 'Kualitas layanan',
+    'PARTNER_CONDUCT': 'Perilaku mitra/bidan',
+    'SCHEDULING': 'Jadwal kunjungan',
+    'PRICE_OR_PAYMENT': 'Biaya atau pembayaran',
+    'PRIVACY': 'Privasi dan data pribadi',
+    'SAFETY': 'Keselamatan',
+    'OTHER': 'Lainnya',
+  };
+
+  @override
+  void dispose() {
+    _description.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Laporkan masalah'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              value: _category,
+              isExpanded: true,
+              decoration: const InputDecoration(labelText: 'Kategori'),
+              items: _categories.entries.map((e) =>
+                DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
+              onChanged: (value) {
+                if (value != null) setState(() => _category = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _description,
+              minLines: 3,
+              maxLines: 5,
+              maxLength: 1000,
+              decoration: const InputDecoration(
+                labelText: 'Jelaskan masalah (minimal 10 karakter)',
+                alignLabelWithHint: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          onPressed: _description.text.trim().length < 10 ? null : () =>
+            Navigator.of(context).pop({
+              'category': _category,
+              'description': _description.text.trim(),
+            }),
+          child: const Text('Kirim pengaduan'),
         ),
       ],
     );
