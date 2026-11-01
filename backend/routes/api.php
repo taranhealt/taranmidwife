@@ -32,7 +32,7 @@ Route::prefix('v1')->group(function () {
             Route::get('bookings/{booking}', [BookingController::class, 'show']);
         });
         Route::middleware(EnsureRole::class . ':patient')->group(function () {
-            Route::post('bookings', [BookingController::class, 'store']);
+            Route::post('bookings', [BookingController::class, 'store'])->middleware('throttle:booking-create');
             Route::get('coverage', [\App\Http\Controllers\Api\CoverageController::class, 'check']);
             Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
         });

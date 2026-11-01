@@ -21,7 +21,8 @@
       <li>Nama, email, nomor telepon, dan kata sandi akun diganti sehingga tidak lagi mengarah ke Anda.</li>
       <li>Alamat, telepon, dan koordinat pada pesanan lama dihapus. Catatan pesanan tetap tersimpan tanpa identitas.</li>
       <li>Untuk mitra: data profesi dan dokumen verifikasi dihapus, dan akun tidak dapat menerima tawaran lagi.</li>
-      <li>Pengaduan yang pernah diajukan tetap tersimpan tanpa identitas. Catatan audit sistem tetap ada.</li>
+      <li>Isi teks bebas pengaduan yang Anda laporkan diganti dengan <code>[DIHAPUS]</code>. Metadata dan riwayat penanganan pengaduan dapat tetap disimpan untuk audit; masa retensinya masih memerlukan tinjauan hukum.</li>
+      <li>Catatan audit sistem tetap ada.</li>
       <li>Akun tidak dapat dipulihkan.</li>
       <li>Akun tidak dapat dihapus selama masih ada pesanan yang belum selesai atau dibatalkan.</li>
     </ul>

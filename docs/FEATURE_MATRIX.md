@@ -87,3 +87,26 @@ Status meanings:
 ## Audit conclusion
 
 The repository has a substantial backend and two Flutter app codebases, but the product is **not yet proven end-to-end**. The next hard blocker is a real HTTPS staging deployment and a controlled synthetic-data test pass on physical Android devices. This matrix must be updated only when new source and test evidence exists.
+
+
+## Additional product scope requested in the autonomous continuation
+
+These are not represented as complete merely because the existing backend has adjacent primitives.
+
+| Feature | Status | Evidence / reason |
+|---|---|---|
+| Admin verification API | Selesai + teruji at backend test level | AdminPartnerController and PartnerVerificationTest; temporary signed document URL not implemented |
+| Admin mobile-friendly dashboard metrics | Scaffold / belum teruji | Blade /admin shell exists; metrics and browser E2E not proven |
+| Partner verification status and correction reason | Backend available; Flutter mapping belum teruji | MidwifeProfileController returns status/review_reason; device round-trip not proven |
+| Booking state machine | Selesai + teruji at backend level | BookingWorkflow and BookingFlowTest; cross-app sync not tested on staging |
+| Reschedule and explicit cancellation policy | Belum ada evidence | No reschedule route/state policy established |
+| Automatic offer expiry | Backend command exists; scheduler deployment belum teruji | ExpireBookingOffers command and console schedule; no live scheduler heartbeat |
+| Manual payment ledger/history | Belum ada evidence | Booking price snapshot exists; payment status/history not implemented |
+| Search/filter/rating/favorites/address book | Belum ada evidence | Catalog endpoint exists; complete partner search, reviews and address book not established |
+| Local reminders and education content API | Belum ada evidence | No verified encrypted reminder or backend education module |
+| FCM device tokens/in-app inbox | Belum ada evidence | No verified device-token lifecycle or inbox |
+| Clinical records, ANC/PNC, SATUSEHAT | Belum ada / explicitly excluded | No clinical implementation or integration tests |
+| Docker/compose, health endpoint, boot validation | Belum ada evidence | Not found in audited tree |
+| Backup/restore and monitoring | Belum ada evidence | No tested backup restore or alerting evidence |
+| Dependabot and dependency audit automation | Belum ada evidence | Automation not verified |
+| R8/minify and mapping upload | Belum ada evidence | Current workflow compiles unsigned AAB; mapping pipeline not verified |

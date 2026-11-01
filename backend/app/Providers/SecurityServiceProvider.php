@@ -14,6 +14,7 @@ class SecurityServiceProvider extends ServiceProvider {
         Route::pushMiddlewareToGroup('api', SecurityHeaders::class);
         // Pembatas bernama: tiap pembatas punya hitungan sendiri per pengguna, tidak
         // tercampur dengan throttle lain (throttle tanpa nama berbagi satu hitungan).
+        RateLimiter::for('booking-create', fn (Request $r) => Limit::perMinute(10)->by($r->user()?->getAuthIdentifier() ?: $r->ip()));
         RateLimiter::for('partner-api', fn (Request $r) => Limit::perMinute(120)->by($r->user()?->getAuthIdentifier() ?: $r->ip()));
         RateLimiter::for('partner-upload', fn (Request $r) => Limit::perMinute(20)->by($r->user()?->getAuthIdentifier() ?: $r->ip()));
     }

@@ -43,3 +43,16 @@ Saat pasien atau mitra menghapus akun secara sah:
 - Keputusan GPS harus diterapkan dengan env `TARAN_REQUIRE_GPS=false`; nilai runtime staging/produksi tetap perlu diverifikasi.
 - Keputusan redaksi pengaduan harus dibuktikan oleh migration-free application logic dan regression test.
 - Queue email tetap belum diimplementasikan; ini keputusan penundaan, bukan fitur selesai.
+
+
+## 4. Payment handling
+
+**Default owner decision: manual/offline recording only; no payment gateway.** Current source does not yet provide a complete payment ledger or status history. Do not represent payment as implemented until schema, API, Flutter UI and regression tests exist. Any manual status change must be role-authorized and audited.
+
+## 5. Password-reset response timing
+
+Keep reset email synchronous for the pilot and keep the generic response body. Do not claim timing is indistinguishable: the active-account path sends email while unknown/inactive accounts do not. A safe mitigation requires measured design and regression tests; do not add artificial sleeps as a substitute for equalizing side effects. Queue migration remains deferred until a persistent worker and monitoring exist.
+
+## 6. Coordinates
+
+No automatic GPS permission or device location. Manual coordinates remain optional only where an explicit form supports them. Server default must remain TARAN_REQUIRE_GPS=false.
