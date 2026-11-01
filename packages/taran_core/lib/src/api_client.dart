@@ -14,6 +14,8 @@ class ApiClient {
     required this.tokens,
     http.Client? httpClient,
     this.onUnauthorized,
+    this.requestTimeout = const Duration(seconds: 20),
+    this.uploadTimeout = const Duration(seconds: 60),
   }) : _http = httpClient ?? http.Client();
 
   final String baseUrl;
@@ -21,10 +23,10 @@ class ApiClient {
   final http.Client _http;
   void Function()? onUnauthorized;
 
-  static const _requestTimeout = Duration(seconds: 20);
+  final Duration requestTimeout;
 
   /// Unggahan berkas (hingga 5 MB) di jaringan seluler butuh waktu lebih lama.
-  static const _uploadTimeout = Duration(seconds: 60);
+  final Duration uploadTimeout;
 
   Uri _uri(String path, Map<String, String>? query) {
     final base = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
@@ -56,7 +58,7 @@ class ApiClient {
 
     return _dispatch(
       request,
-      timeout: _requestTimeout,
+      timeout: requestTimeout,
       networkMessage: 'Tidak dapat terhubung. Periksa koneksi internet Anda lalu coba lagi.',
       handleUnauthorized: auth,
     );
@@ -76,7 +78,7 @@ class ApiClient {
 
     return _dispatch(
       request,
-      timeout: _uploadTimeout,
+      timeout: uploadTimeout,
       networkMessage: 'Unggah gagal. Periksa koneksi internet lalu coba lagi.',
       handleUnauthorized: true,
     );
