@@ -130,6 +130,12 @@ jobs:
         env:
           API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
         run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
+      - name: Summarize unsigned QA AAB
+        run: |
+          FILE="apps/patient_app/build/app/outputs/bundle/release/app-release.aab"
+          SIZE=$(stat -c '%s' "$FILE")
+          SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
+          echo "| taranmidwife-patient-release-unsigned-qa | $SIZE bytes | $SHA | UNSIGNED |" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload unsigned QA bundle
         uses: actions/upload-artifact@v5
         with:
@@ -156,6 +162,12 @@ jobs:
         env:
           API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
         run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
+      - name: Summarize unsigned QA AAB
+        run: |
+          FILE="apps/partner_app/build/app/outputs/bundle/release/app-release.aab"
+          SIZE=$(stat -c '%s' "$FILE")
+          SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
+          echo "| taranmidwife-mitra-release-unsigned-qa | $SIZE bytes | $SHA | UNSIGNED |" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload unsigned QA bundle
         uses: actions/upload-artifact@v5
         with:
