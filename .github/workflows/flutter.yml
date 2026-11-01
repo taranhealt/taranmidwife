@@ -60,7 +60,7 @@ jobs:
       - name: Summarize staging APK
         if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
         run: |
-          FILE="apps/patient_app/build/app/outputs/flutter-apk/app-debug.apk"
+          FILE="build/app/outputs/flutter-apk/app-debug.apk"
           SIZE=$(stat -c '%s' "$FILE")
           SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
           echo "| taranmidwife-patient-debug-apk | $SIZE bytes | $SHA |" >> "$GITHUB_STEP_SUMMARY"
@@ -99,7 +99,7 @@ jobs:
       - name: Summarize staging APK
         if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
         run: |
-          FILE="apps/partner_app/build/app/outputs/flutter-apk/app-debug.apk"
+          FILE="build/app/outputs/flutter-apk/app-debug.apk"
           SIZE=$(stat -c '%s' "$FILE")
           SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
           echo "| taranmidwife-mitra-debug-apk | $SIZE bytes | $SHA |" >> "$GITHUB_STEP_SUMMARY"
@@ -132,7 +132,7 @@ jobs:
         run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
       - name: Summarize unsigned QA AAB
         run: |
-          FILE="apps/patient_app/build/app/outputs/bundle/release/app-release.aab"
+          FILE="build/app/outputs/bundle/release/app-release.aab"
           SIZE=$(stat -c '%s' "$FILE")
           SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
           echo "| taranmidwife-patient-release-unsigned-qa | $SIZE bytes | $SHA | UNSIGNED |" >> "$GITHUB_STEP_SUMMARY"
@@ -164,7 +164,7 @@ jobs:
         run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
       - name: Summarize unsigned QA AAB
         run: |
-          FILE="apps/partner_app/build/app/outputs/bundle/release/app-release.aab"
+          FILE="build/app/outputs/bundle/release/app-release.aab"
           SIZE=$(stat -c '%s' "$FILE")
           SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
           echo "| taranmidwife-mitra-release-unsigned-qa | $SIZE bytes | $SHA | UNSIGNED |" >> "$GITHUB_STEP_SUMMARY"
