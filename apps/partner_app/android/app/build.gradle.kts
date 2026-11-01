@@ -7,7 +7,8 @@ plugins {
 
 android {
     namespace = "com.taranrainmakergroup.taranmidwifemitra"
-    compileSdk = flutter.compileSdkVersion
+    // file_picker's Android lifecycle dependency requires API 36 metadata.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
