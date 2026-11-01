@@ -50,7 +50,7 @@ Route::prefix('v1')->group(function () {
         });
         Route::prefix('admin')->group(function () {
             Route::middleware(EnsureRole::class . ':ops_admin,reviewer,sysadmin')->group(function () {
-                Route::get('metrics', [\\App\\Http\\Controllers\\Api\\AdminDashboardController::class, 'metrics']);
+                Route::get('metrics', [\App\Http\Controllers\Api\AdminDashboardController::class, 'metrics']);
             });
             Route::middleware(\App\Http\Middleware\EnsureRole::class . ':ops_admin,reviewer,sysadmin')->group(function () {
                 Route::get('complaints', [\App\Http\Controllers\Api\AdminComplaintController::class, 'index']);
