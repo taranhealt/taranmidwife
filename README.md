@@ -9,6 +9,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub Issues](https://img.shields.io/github/issues/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/forks)
+[![Contributors](https://img.shields.io/github/contributors/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/graphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/commits/main)
+[![Pull Requests](https://img.shields.io/github/issues-pr/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/pulls)
+[![Support on Saweria](https://img.shields.io/badge/Saweria-Support%20Development-orange)](https://saweria.co/taranrainmaker)
 
 </div>
 
