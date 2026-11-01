@@ -4,110 +4,291 @@
 
 ### Digital Midwifery & Maternal Healthcare Platform
 
-**An open-source healthcare technology initiative by PT Taran Rainmaker Group.**
+**Building practical digital technology for maternal and community healthcare.**
+
+An open-source healthcare technology initiative by
+**PT Taran Rainmaker Group**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub Issues](https://img.shields.io/github/issues/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/issues)
-[![GitHub Stars](https://img.shields.io/github/stars/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/forks)
+[GitHub](https://github.com/taranrainmaker) | [Saweria](https://saweria.co/taranrainmaker)
+[GitHub](https://github.com/taranrainmaker) | [Saweria](https://saweria.co/taranrainmaker)
+[GitHub](https://github.com/taranrainmaker) | [Saweria](https://saweria.co/taranrainmaker)
+[![Pull Requests](https://img.shields.io/github/issues-pr/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/pulls)
 [![Contributors](https://img.shields.io/github/contributors/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/graphs/contributors)
 [![Last Commit](https://img.shields.io/github/last-commit/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/commits/main)
-[![Pull Requests](https://img.shields.io/github/issues-pr/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/pulls)
 [![Support on Saweria](https://img.shields.io/badge/Saweria-Support%20Development-orange)](https://saweria.co/taranrainmaker)
+
+[Overview](#overview) •
+[Architecture](#architecture) •
+[Features](#current-capabilities) •
+[Technology](#technology-stack) •
+[Getting Started](#getting-started) •
+[Contributing](#contributing)
 
 </div>
 
 ---
 
-## About the Project
+## Overview
 
-TaranMidwife is a digital healthcare platform developed to support midwifery services, maternal healthcare workflows, patient engagement, and connected healthcare operations.
+TaranMidwife is a digital healthcare technology platform designed to support midwifery services, maternal healthcare workflows, patient engagement, and connected healthcare operations.
 
-The project is developed by **PT Taran Rainmaker Group** with a long-term vision of making accessible, practical, and interoperable healthcare technology available to healthcare providers and communities.
+Developed by **PT Taran Rainmaker Group**, the project aims to make practical, accessible, and interoperable digital healthcare technology more available to healthcare providers and communities.
 
-TaranMidwife is designed as an evolving platform. Its architecture and capabilities will continue to improve through testing, documentation, and contributions from the developer community.
+The repository is maintained as an evolving open-source project. Its backend, patient application, shared components, and supporting infrastructure are developed as parts of a common platform.
 
-## Project Goals
+## Project Vision
 
-- Support digital transformation in midwifery and maternal healthcare.
-- Improve patient access to healthcare services.
-- Support healthcare providers through digital workflows.
-- Build a maintainable and extensible healthcare technology platform.
-- Encourage collaboration between developers and the wider healthcare technology community.
-- Support responsible interoperability with relevant healthcare systems and standards.
+Our vision is to support the digital transformation of maternal and community healthcare through technology that is:
 
-## Repository Structure
+- **Accessible** — designed to support patients and healthcare providers.
+- **Practical** — focused on real operational workflows.
+- **Interoperable** — designed with API-based integration in mind.
+- **Maintainable** — organized for long-term development.
+- **Responsible** — developed with attention to privacy, security, and healthcare considerations.
 
-| Directory | Description |
-|---|---|
-| `backend/` | Laravel backend and API |
-| `apps/patient_app/` | Flutter patient Android application |
-| `packages/taran_core/` | Shared Flutter/Dart components |
-| `docs/` | Project architecture, roadmap, and contribution documentation |
-| `.github/` | GitHub Actions, issue templates, and contribution workflows |
+## Current Capabilities
 
-The availability and maturity of each component may differ. See the project documentation for current implementation status.
+The following capabilities are represented in the current source code and project documentation. Their testing and implementation maturity may differ.
 
+### Backend and API
+
+- Authentication and role-based authorization.
+- Patient and healthcare partner account workflows.
+- Service catalog and service-area management.
+- Appointment and booking workflows.
+- Booking assignment and partner offer management.
+- Partner verification and credential-expiry handling.
+- Location-based service coverage and matching.
+- Complaint management workflows.
+- Account deletion and anonymization mechanisms.
+- API rate limiting and audit-related functionality.
+
+### Patient Application
+
+The Flutter patient application source currently includes:
+
+- Authentication interface.
+- Home navigation.
+- Service listing.
+- Booking form.
+- Order listing.
+- User profile.
+- Emergency information component.
+- Retry and error presentation components.
+
+The availability of a screen or component does not necessarily mean its complete workflow has passed end-to-end testing.
+
+### Web Interfaces
+
+The backend source also contains web interfaces for patient, partner, and administrative workflows. These interfaces have different levels of implementation and testing maturity.
+
+See the [Development Status](backend/docs/DEVELOPMENT_STATUS.md) documentation for details.
+
+## Architecture
+
+TaranMidwife is organized as a monorepository.
+
+```text
+TaranMidwife
+│
+├── backend/
+│   └── Laravel REST API
+│       ├── Authentication
+│       ├── Business Logic
+│       ├── API Routes
+│       ├── Database
+│       └── Automated Tests
+│
+├── apps/
+│   └── patient_app/
+│       └── Flutter Android Application
+│
+├── packages/
+│   └── taran_core/
+│       └── Shared Dart Components
+│
+├── docs/
+│   └── Architecture and Project Documentation
+│
+├── infrastructure/
+│   └── Operational Utility Scripts
+│
+└── .github/
+    └── Workflows and Repository Templates
 ## Technology Stack
 
-- **Backend:** PHP and Laravel
-- **Mobile:** Flutter and Dart
-- **Database:** PostgreSQL
-- **API:** REST architecture
-- **CI/CD:** GitHub Actions
+| Component | Technology |
+|---|---|
+| Backend | PHP 8.3+ |
+| Backend Framework | Laravel 13 |
+| Authentication | Laravel Sanctum |
+| Database | PostgreSQL |
+| Patient Application | Flutter |
+| Programming Language | Dart |
+| Shared Components | `taran_core` |
+| API Architecture | REST |
+| Automation | GitHub Actions |
+
+## Repository Components
+
+| Path | Description |
+|---|---|
+| `backend/` | Laravel backend and REST API |
+| `apps/patient_app/` | Flutter patient Android application |
+| `packages/taran_core/` | Shared Dart components |
+| `docs/` | Architecture and project documentation |
+| `infrastructure/` | Utility and operational scripts |
+| `.github/` | GitHub workflows and templates |
 
 ## Getting Started
 
-Start by reviewing the documentation:
+### Prerequisites
 
-1. [Development Guide](CONTRIBUTING.md)
-2. [Architecture](docs/ARCHITECTURE.md)
-3. [Documentation Index](docs/README.md)
-4. [Development Status](backend/docs/DEVELOPMENT_STATUS.md)
-5. [Roadmap](ROADMAP.md)
+- PHP 8.3 or compatible newer version.
+- Composer.
+- PostgreSQL.
+- Flutter SDK compatible with the project's Dart constraint.
+- Android SDK for Android builds.
+- Java 17 for Android tooling.
 
-Application-specific setup instructions are available in the relevant project directories.
+### Backend Setup
 
-## Contributing
+```bash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-Contributions are welcome.
+Configure your local database connection in `.env`, then run:
 
-You can help by:
+```bash
+php artisan migrate
+php artisan serve
+```
 
-- Reporting bugs.
-- Improving documentation.
-- Reviewing code.
-- Proposing features.
-- Improving security and reliability.
-- Contributing tested code.
+Run backend tests:
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a contribution.
+```bash
+php artisan test
+```
 
-## Security
+Documentation:
 
-Please do not report security vulnerabilities through public GitHub issues.
+- [Backend README](backend/README.md)
+- [Local Run Guide](backend/docs/LOCAL_RUN.md)
+- [Deployment Guide](backend/docs/DEPLOYMENT.md)
+### Patient Application Setup
 
-Read [SECURITY.md](SECURITY.md) for responsible disclosure guidance.
+```bash
+cd apps/patient_app
+flutter pub get
+flutter analyze
+flutter test
+```
+
+Build a development APK:
+
+```bash
+flutter build apk --debug
+```
+
+Configure the backend endpoint for development or testing:
+
+```bash
+--dart-define=API_BASE_URL=https://your-api-host.example/api/v1
+```
+
+See [Patient Application Documentation](apps/patient_app/README.md).
 
 ## Project Status
 
-TaranMidwife is under active development. Some components are functional while deployment, security verification, operational readiness, and regulatory reviews remain ongoing.
+TaranMidwife is under active development.
 
-Do not use this repository as evidence that the system has been approved for clinical production use or regulatory certification.
+The backend contains functionality that has been tested in a local development environment. The patient Flutter application source is available, while mobile end-to-end validation and production release preparation remain ongoing.
+
+The project is not presented as production-ready or clinically certified.
+
+| Area | Current Position |
+|---|---|
+| Backend foundation | Implemented; local testing documented |
+| REST API | Implemented; local testing documented |
+| Patient Flutter source | Available; validation ongoing |
+| Shared Dart package | Available |
+| Web interfaces | Mixed implementation and testing status |
+| Production deployment | Not yet established in project status |
+| Mobile production release | Not yet approved |
+| Legal and clinical review | Pending |
+| Security assessment | Ongoing |
+
+Further information:
+
+- [Development Status](backend/docs/DEVELOPMENT_STATUS.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
+- [Google Play Release Status](backend/docs/PLAY_RELEASE_STATUS.md)
+
+## Security and Privacy
+
+Healthcare technology requires responsible handling of personal and sensitive information.
+
+Our development principles:
+
+- Use synthetic data for development and testing.
+- Never commit real patient records or production credentials.
+- Keep environment files, access tokens, and private keys out of version control.
+- Review authentication, authorization, and data access changes carefully.
+- Report security vulnerabilities privately rather than through public issues.
+
+Read our [Security Policy](SECURITY.md).
+
+## Contributing
+
+We welcome contributions from developers, designers, testers, documentation writers, and the wider healthcare technology community.
+
+You can contribute by:
+
+- Reporting reproducible bugs.
+- Improving documentation.
+- Reviewing code.
+- Proposing new features.
+- Improving accessibility and reliability.
+- Submitting tested improvements.
+
+Please read `CONTRIBUTING.md` before submitting a pull request.
+
+See our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+TaranMidwife source code is distributed under the [MIT License](LICENSE().
 
-The MIT License applies to the code covered by the license. TaranMidwife, PT Taran Rainmaker Group, and associated branding remain subject to applicable trademark and intellectual property rights.
+The MIT License applies to the code covered by the license. Project names, logos, branding, and trademarks associated with TaranMidwife and PT Taran Rainmaker Group remain subject to applicable intellectual property rights.
 
----
+## Support the Project
+
+Open-source development takes time, research, testing, and continuous improvement.
+
+If you find this project useful and would like to support its development, you can contribute through Saweria.
+
+<br>
 
 <div align="center">
 
-**Built with purpose by PT Taran Rainmaker Group**
-
-Healthcare Technology • Digital Innovation • Open Collaboration
+> [Support TaranMidwife Development](https://saweria.co/taranrainmaker)
 
 </div>
+
+---
+
+<center>
+
+**Developed and maintained by PT Taran Rainmaker Group**
+
+Healthcare Technology - Digital Innovation - Open Collaboration
+
+[GitHub](https://github.com/taranrainmaker) | [Saweria](https://saweria.co/taranrainmaker)
+
+</center>
