@@ -1,4 +1,4 @@
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 
 allprojects {
     repositories {
@@ -21,12 +21,24 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// Configure Android library plugins as soon as the Android library plugin is applied.
-// Do not use afterEvaluate: AGP reads compileSdk during project configuration.
+// Raise compileSdk of third-party Flutter plugin modules (e.g. file_picker) to at least 36,
+// as required by flutter_plugin_android_lifecycle.
+//
+// Why finalizeDsl: a plugin's own `android { compileSdk = ... }` block runs AFTER
+// plugins.withId(...) fires, so setting the value there is silently overwritten
+// (the plugin stays on android-34). afterEvaluate is too late: AGP has already read
+// compileSdk ("It is too late to set compileSdk"). finalizeDsl runs after every
+// build script `android {}` block has been parsed and before AGP consumes the values.
+// Only ever raises the value; never lowers it.
 subprojects {
     plugins.withId("com.android.library") {
-        extensions.configure<LibraryExtension> {
-            compileSdk = 36
+        extensions.configure<LibraryAndroidComponentsExtension> {
+            finalizeDsl { libraryExtension ->
+                val current = libraryExtension.compileSdk ?: 0
+                if (current < 36) {
+                    libraryExtension.compileSdk = 36
+                }
+            }
         }
     }
 }
