@@ -21,11 +21,13 @@ class MidwifeBookingController extends Controller {
             abort(response()->json(['code' => 'PARTNER_NOT_ACTIVE', 'message' => 'Akun mitra belum aktif.'], 403));
         }
     }
-    private function run(Request $request, string $booking, string $to, BookingWorkflow $wf, bool $needsActive, ?callable $after = null): JsonResponse {
+    private function run(Request $request, string $booking, string $to, BookingWorkflow $wf, bool $needsActive, ?callable $after = null, ?callable $guard = null): JsonResponse {
         $user = $request->user();
-        $b = DB::transaction(function () use ($booking, $user, $to, $wf, $needsActive, $after) {
+        $b = DB::transaction(function () use ($booking, $user, $to, $wf, $needsActive, $after, $guard) {
             $b = $this->mine($booking, $user);
             if ($needsActive) { $this->ensureActive($user); }
+            // Run transition guards while the booking row is locked to avoid TOCTOU.
+            if ($guard) { $guard($b, $user); }
             $wf->transition($b, $to, $user->id);
             if ($after) { $after($b); }
             return $b;
@@ -33,13 +35,29 @@ class MidwifeBookingController extends Controller {
         return response()->json(['data' => BookingPresenter::present($b->load(['service', 'area']), $user)]);
     }
     public function accept(Request $request, string $booking, BookingWorkflow $wf): JsonResponse {
-        $expired = Assignment::where('booking_id', $booking)->where('partner_id', $request->user()->id)
-            ->where('active', true)->where('auto_offered', true)->where('offer_expires_at', '<', now())->exists();
-        if ($expired) {
-            return response()->json(['code' => 'OFFER_EXPIRED', 'message' => 'Tawaran sudah kedaluwarsa.'], 409);
-        }
-        return $this->run($request, $booking, 'CONFIRMED', $wf, true, fn ($b) =>
-            Assignment::where('booking_id', $b->id)->where('active', true)->update(['accepted_at' => now()]));
+        return $this->run(
+            $request,
+            $booking,
+            'CONFIRMED',
+            $wf,
+            true,
+            fn ($b) => Assignment::where('booking_id', $b->id)->where('active', true)->update(['accepted_at' => now()]),
+            function ($b, $user) {
+                $expired = Assignment::where('booking_id', $b->id)
+                    ->where('partner_id', $user->id)
+                    ->where('active', true)
+                    ->where('auto_offered', true)
+                    ->where('offer_expires_at', '<', now())
+                    ->lockForUpdate()
+                    ->first();
+                if ($expired) {
+                    abort(response()->json([
+                        'code' => 'OFFER_EXPIRED',
+                        'message' => 'Tawaran sudah kedaluwarsa.',
+                    ], 409));
+                }
+            },
+        );
     }
     public function decline(Request $request, string $booking, BookingWorkflow $wf): JsonResponse {
         return $this->run($request, $booking, 'WAITING_MIDWIFE', $wf, false, fn ($b) => app(\App\Services\OfferDispatcher::class)->afterDecline($b));
