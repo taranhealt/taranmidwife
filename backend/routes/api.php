@@ -9,14 +9,13 @@ use App\Http\Controllers\Api\MidwifeProfileController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Throwable;
 
 // Minimal readiness endpoint: never exposes configuration, exception or database details.
 Route::get('health', static function () {
     try {
         DB::connection()->select('select 1');
         return response()->json(['status' => 'ok']);
-    } catch (Throwable $exception) {
+    } catch (\\Throwable $exception) {
         report($exception);
         return response()->json(['status' => 'unavailable'], 503);
     }
