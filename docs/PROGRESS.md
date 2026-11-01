@@ -7,3 +7,11 @@ Completed: read feature matrix, decisions, workflows, API routes/controllers and
 Remaining: exact final HEAD CI; reset timing mitigation; exhaustive IDOR; temporary signed document URL; admin metrics/status UX; reschedule/cancellation, scheduled offers and manual payment; search/favorites/address book/reviews/reminders/education/FCM; Docker/health/boot checks/backups/monitoring/dependency automation/R8; physical device staging QA, legal review and signed release.
 
 Execution limitation: GitHub operations only; no local PHP/Flutter runtime, PostgreSQL instance, Android device, staging host or signing material. Missing capabilities are not marked complete.
+
+
+## Exact-head CI result
+- Code/documentation head b11d1500cda9b2feaaba549ce188b3ba5f037f37.
+- Flutter CI #77 / 41330707789: SUCCESS. Core, Patient, Partner, both unsigned QA AAB jobs SUCCESS; signed AAB SKIPPED.
+- Backend CI #120 / 41330707807: SUCCESS. Test job SUCCESS.
+- Artifacts from Flutter run #77: patient debug APK 77,670,379 bytes; partner debug APK 77,260,835 bytes; patient unsigned QA AAB 51,331,418 bytes; partner unsigned QA AAB 51,194,150 bytes. Not signed.
+- Remaining: staging/device QA and major feature/infrastructure backlog listed above.

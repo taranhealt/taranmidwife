@@ -62,11 +62,11 @@ Status meanings:
 
 | Item | Status | Evidence | Notes |
 |---|---|---|---|
-| Shared Dart core analyze/test | Selesai + teruji | Flutter CI run #75, commit `6299e72` | No physical-device test implied |
-| Patient app analyze/test/debug APK | Selesai + teruji | Flutter CI run #75, commit `6299e72` | No physical-device test implied |
-| Partner app analyze/test/debug APK | Selesai + teruji | Flutter CI run #75, commit `6299e72` | No physical-device test implied |
-| Unsigned QA AAB for both apps | Selesai + teruji | Flutter CI run #75 artifacts | Not signed; not Play Store ready |
-| Backend automated test suite | Selesai + teruji | Backend CI run #118, commit `6299e72` | No deployed-staging test implied |
+| Shared Dart core analyze/test | Selesai + teruji | Flutter CI run #77 (run ID 41330707789, SHA b11d150), commit `6299e72` | No physical-device test implied |
+| Patient app analyze/test/debug APK | Selesai + teruji | Flutter CI run #77 (run ID 41330707789, SHA b11d150), commit `6299e72` | No physical-device test implied |
+| Partner app analyze/test/debug APK | Selesai + teruji | Flutter CI run #77 (run ID 41330707789, SHA b11d150), commit `6299e72` | No physical-device test implied |
+| Unsigned QA AAB for both apps | Selesai + teruji | Flutter CI run #77 (run ID 41330707789, SHA b11d150) artifacts | Not signed; not Play Store ready |
+| Backend automated test suite | Selesai + teruji | Backend CI run #120 (run ID 41330707807, SHA b11d150), commit `6299e72` | No deployed-staging test implied |
 | Signed Play AAB | Belum tersedia | Signed job intentionally gated; no signing secrets | Requires owner-managed keystore and production URL |
 | Staging integration | Belum teruji / menunggu | No verified staging URL or configured variable available in audit; CI may build with an empty optional staging variable | Do not claim connected; configure an owned HTTPS staging URL |
 | Physical device QA | Belum teruji | No device test evidence | Required before release |
@@ -110,3 +110,7 @@ These are not represented as complete merely because the existing backend has ad
 | Backup/restore and monitoring | Belum ada evidence | No tested backup restore or alerting evidence |
 | Dependabot and dependency audit automation | Belum ada evidence | Automation not verified |
 | R8/minify and mapping upload | Belum ada evidence | Current workflow compiles unsigned AAB; mapping pipeline not verified |
+
+
+## Exact-head verification update
+At commit b11d1500cda9b2feaaba549ce188b3ba5f037f37, Flutter CI #77 (41330707789) completed SUCCESS and Backend CI #120 (41330707807) completed SUCCESS. Flutter jobs: Core, Patient, Partner, Patient unsigned QA AAB, Partner unsigned QA AAB all SUCCESS; signed AAB SKIPPED by design. This is CI evidence only, not staging/device E2E.
