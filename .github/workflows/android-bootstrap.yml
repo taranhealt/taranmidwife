@@ -9,35 +9,30 @@ permissions:
 jobs:
   verify:
     name: Verify existing Android project
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
+        uses: actions/checkout@v5
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
       - name: Verify patient Android project
         run: |
           test -f apps/patient_app/android/app/build.gradle.kts
           test -f apps/patient_app/android/settings.gradle.kts
           test -f apps/patient_app/android/gradle/wrapper/gradle-wrapper.properties
+          test -f apps/partner_app/android/app/build.gradle.kts
+          test -f apps/partner_app/android/settings.gradle.kts
           flutter --version
           java -version
-
-      - name: Explain missing partner app
+      - name: Verify compileSdk guard remains present
         run: |
-          if [ -d apps/partner_app ]; then
-            echo "Partner app directory exists."
-          else
-            echo "Partner app has not been created yet; no files were generated or pushed."
-          fi
+          grep -q 'finalizeDsl' apps/patient_app/android/build.gradle.kts
+          grep -q 'finalizeDsl' apps/partner_app/android/build.gradle.kts
