@@ -52,11 +52,20 @@ jobs:
         run: flutter analyze --no-fatal-infos
       - name: Test
         run: flutter test
-      - name: Build debug APK
+      - name: Build staging debug APK
+        if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
         env:
           API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
         run: flutter build apk --debug --dart-define=API_BASE_URL="$API_BASE_URL"
-      - name: Upload debug APK
+      - name: Summarize staging APK
+        if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
+        run: |
+          FILE="apps/patient_app/build/app/outputs/flutter-apk/app-debug.apk"
+          SIZE=$(stat -c '%s' "$FILE")
+          SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
+          echo "| taranmidwife-patient-debug-apk | $SIZE bytes | $SHA |" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload staging debug APK
+        if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
         uses: actions/upload-artifact@v5
         with:
           name: taranmidwife-patient-debug-apk
@@ -82,11 +91,20 @@ jobs:
         run: flutter analyze --no-fatal-infos
       - name: Test
         run: flutter test
-      - name: Build debug APK
+      - name: Build staging debug APK
+        if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
         env:
           API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
         run: flutter build apk --debug --dart-define=API_BASE_URL="$API_BASE_URL"
-      - name: Upload debug APK
+      - name: Summarize staging APK
+        if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
+        run: |
+          FILE="apps/partner_app/build/app/outputs/flutter-apk/app-debug.apk"
+          SIZE=$(stat -c '%s' "$FILE")
+          SHA=$(sha256sum "$FILE" | cut -d ' ' -f 1)
+          echo "| taranmidwife-mitra-debug-apk | $SIZE bytes | $SHA |" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload staging debug APK
+        if: ${{ vars.TARAN_STAGING_API_BASE_URL != '' }}
         uses: actions/upload-artifact@v5
         with:
           name: taranmidwife-mitra-debug-apk
