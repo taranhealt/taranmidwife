@@ -120,8 +120,33 @@
       b.dataset.tab = t[0];
       box.appendChild(b);
     });
+    loadMetrics();
     showTab(TABS[role][0][0]);
   }
+  function loadMetrics() {
+    var box = $('metrics');
+    box.textContent = 'Memuat ringkasan...';
+    api('/admin/metrics').then(function (r) {
+      box.textContent = '';
+      if (!r.ok || !r.json || !r.json.data) {
+        box.appendChild(el('p', 'note', 'Ringkasan tidak tersedia saat ini.'));
+        return;
+      }
+      var d = r.json.data;
+      [
+        ['Total pesanan', d.bookings_total],
+        ['Pesanan berjalan', d.bookings_open],
+        ['Mitra aktif', d.active_partners],
+        ['Pengaduan terbuka', d.complaints_open]
+      ].forEach(function (item) {
+        var card = el('div', 'card');
+        card.appendChild(el('div', 'small', item[0]));
+        card.appendChild(el('strong', null, String(item[1])));
+        box.appendChild(card);
+      });
+    });
+  }
+
   function showTab(t) {
     msg('');
     [].forEach.call($('tabs').children, function (b) { b.className = b.dataset.tab === t ? 'active' : 'secondary'; });

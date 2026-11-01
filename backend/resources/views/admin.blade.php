@@ -29,6 +29,9 @@
 
   <div id="app" hidden>
     <p id="who" class="note"></p>
+    <section id="metrics" aria-label="Ringkasan dashboard" class="row">
+      <p class="note">Memuat ringkasan...</p>
+    </section>
     <div id="tabs" class="tabs"></div>
 
     <section id="p-orders" hidden>
