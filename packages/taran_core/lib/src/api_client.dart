@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -70,4 +71,40 @@ class ApiClient {
     }
     throw ApiException.fromResponse(res.statusCode, data);
   }
+  Future<JsonMap> uploadFile(
+    String path, {
+    required String field,
+    required File file,
+    Map<String, String>? fields,
+  }) async {
+    final request = http.MultipartRequest('POST', _uri(path, null));
+    request.headers['Accept'] = 'application/json';
+    final token = await tokens.read();
+    if (token != null && token.isNotEmpty) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+    if (fields != null) request.fields.addAll(fields);
+    request.files.add(await http.MultipartFile.fromPath(field, file.path));
+    final http.Response res;
+    try {
+      final streamed = await _http.send(request).timeout(const Duration(seconds: 30));
+      res = await http.Response.fromStream(streamed);
+    } catch (_) {
+      throw const ApiException(status: 0, message: 'Unggah gagal. Periksa koneksi internet lalu coba lagi.');
+    }
+    JsonMap data = {};
+    if (res.bodyBytes.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(utf8.decode(res.bodyBytes));
+        if (decoded is Map<String, dynamic>) data = decoded;
+      } catch (_) {}
+    }
+    if (res.statusCode >= 200 && res.statusCode < 300) return data;
+    if (res.statusCode == 401) {
+      await tokens.clear();
+      onUnauthorized?.call();
+    }
+    throw ApiException.fromResponse(res.statusCode, data);
+  }
+
 }
