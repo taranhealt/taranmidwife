@@ -83,6 +83,40 @@ jobs:
           retention-days: 14
 
 
+  partner-release-compile:
+    name: Midwife partner release bundle compile (unsigned)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/partner_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+      - name: Test
+        run: flutter test
+      - name: Compile release app bundle (unsigned)
+        env:
+          API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
+        run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
+      - name: Upload unsigned QA bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: taranmidwife-mitra-release-unsigned-qa
+          path: apps/partner_app/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
+
   partner:
     name: Midwife partner Android app
     runs-on: ubuntu-latest
