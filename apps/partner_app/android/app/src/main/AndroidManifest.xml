@@ -3,6 +3,8 @@
     <application
         android:label="TaranMidwife Mitra"
         android:name="${applicationName}"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
         >
         <activity
             android:name=".MainActivity"
