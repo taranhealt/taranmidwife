@@ -68,6 +68,8 @@ class _ServicesTabState extends State<ServicesTab> {
         children: [
           const EmergencyNote(),
           const SizedBox(height: 12),
+          const _CoverageCard(),
+          const SizedBox(height: 12),
           if (items.isEmpty)
             const Padding(
               padding: EdgeInsets.all(24),
@@ -122,4 +124,83 @@ class _ServiceCard extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class _CoverageCard extends StatefulWidget {
+  const _CoverageCard();
+
+  @override
+  State<_CoverageCard> createState() => _CoverageCardState();
+}
+
+class _CoverageCardState extends State<_CoverageCard> {
+  final _lat = TextEditingController();
+  final _lng = TextEditingController();
+  bool _busy = false;
+  String? _result;
+  String? _error;
+
+  @override
+  void dispose() {
+    _lat.dispose();
+    _lng.dispose();
+    super.dispose();
+  }
+
+  Future<void> _check() async {
+    final lat = double.tryParse(_lat.text.trim());
+    final lng = double.tryParse(_lng.text.trim());
+    if (lat == null || lng == null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      setState(() => _error = 'Masukkan koordinat lintang dan bujur yang valid.');
+      return;
+    }
+    setState(() { _busy = true; _error = null; _result = null; });
+    try {
+      final r = await context.read<ApiClient>().send(
+        'GET',
+        '/coverage',
+        query: {'lat': lat.toString(), 'lng': lng.toString()},
+      );
+      final d = Map<String, dynamic>.from(r['data'] as Map);
+      final inPilot = d['in_pilot_area'] == true;
+      final serviceable = d['serviceable'] == true;
+      final pilot = (d['pilot_name'] ?? 'wilayah pilot').toString();
+      final count = (d['partners_nearby'] ?? 0).toString();
+      if (mounted) setState(() => _result = serviceable
+        ? 'Layanan tersedia di sekitar lokasi Anda. Mitra terdekat: ' + count + '.'
+        : (inPilot
+          ? 'Lokasi termasuk ' + pilot + ', tetapi belum ada mitra yang tersedia.'
+          : 'Lokasi berada di luar wilayah pilot ' + pilot + '.'));
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.displayMessage);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Cek jangkauan layanan', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        const Text('Masukkan koordinat lokasi secara manual. Lokasi perangkat tidak diambil otomatis.'),
+        const SizedBox(height: 8),
+        Row(children: [
+          Expanded(child: TextField(controller: _lat, keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), decoration: const InputDecoration(labelText: 'Latitude'))),
+          const SizedBox(width: 8),
+          Expanded(child: TextField(controller: _lng, keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), decoration: const InputDecoration(labelText: 'Longitude'))),
+        ]),
+        const SizedBox(height: 8),
+        SizedBox(width: double.infinity, child: OutlinedButton(
+          onPressed: _busy ? null : _check,
+          child: _busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Periksa jangkauan'),
+        )),
+        if (_result != null) Text(_result!),
+        if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+      ]),
+    ),
+  );
 }
