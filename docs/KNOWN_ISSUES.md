@@ -18,8 +18,8 @@
 
 ## CI follow-up
 
-- Latest code SHA: `f9bcafccf7248c807a9d08997137fe291a841c3c`.
-- Flutter CI #81 (41362379396) and Backend CI #124 (41362379382) completed successfully.
+- Latest code SHA: `30da6557ea6ecd1ed898d7040162c56570d13caa`.
+- Flutter CI #85 (41363527847) and Backend CI #128 (41363527786) completed successfully.
 - Since `TARAN_STAGING_API_BASE_URL` is unset, the Patient and Partner staging APK build/summary/upload steps are intentionally skipped. No APK is provided by that run.
-- Both unsigned QA AAB compile/upload jobs succeeded. These are not signed Play Store artifacts.
+- Both unsigned QA AAB compile/upload jobs succeeded; `/api/health` is covered by success and sanitized failure regression tests. These are not signed Play Store artifacts.
 - Workflow includes AAB artifact size/SHA-256 summaries; APK summary executes only when staging is configured.

@@ -1,7 +1,7 @@
 # TaranMidwife — Feature Matrix
 
 **Branch:** `infra/android-ci-hardening`  
-**Source audit SHA:** `f9bcafccf7248c807a9d08997137fe291a841c3c`  
+**Source audit SHA:** `30da6557ea6ecd1ed898d7040162c56570d13caa`  
 **Scope:** repository source and automated CI evidence. No staging URL, emulator, physical-device session, or production deployment was available. This matrix does not claim end-to-end readiness.
 
 Status meanings:
@@ -15,7 +15,8 @@ Status meanings:
 
 | Feature | Status | Evidence | Remaining |
 |---|---|---|---|
-| Sanctum register/login/logout | Selesai + teruji | AuthController, AuthAccessTest, LoginUniformityTest; Backend CI #124 | Deployed staging and mail-provider test |
+| Sanctum register/login/logout | Selesai + teruji | AuthController, AuthAccessTest, LoginUniformityTest; Backend CI #128 | Deployed staging and mail-provider test |
+| Non-sensitive database readiness endpoint `/api/health` | Selesai + teruji | `routes/api.php`, `HealthEndpointTest` (success and sanitized 503) | Verify behind deployed proxy |
 | Service and area catalog | Selesai + teruji | CatalogController and API tests | Flutter contract tests against staging |
 | Patient booking create/list/detail/cancel | Selesai + teruji | BookingController, BookingFlowTest | Cross-app E2E and concurrent-device QA |
 | Booking state transitions | Selesai + teruji | BookingWorkflow, BookingFlowTest, OfferDispatchTest | Verify sync in two apps on staging |
@@ -37,7 +38,7 @@ Status meanings:
 
 | Feature | Status | Evidence | Remaining |
 |---|---|---|---|
-| App bootstrap/API URL guard | Selesai + teruji at unit/config level | config.dart, shared core tests, Flutter CI #81 | Real staging installation |
+| App bootstrap/API URL guard | Selesai + teruji at unit/config level | config.dart, shared core tests, Flutter CI #85 | Real staging installation |
 | Auth screens and API calls | Belum teruji end-to-end | auth_page.dart and shared API client | Staging request/response tests |
 | Service catalogue | Belum teruji end-to-end | services_tab.dart | Loading/empty/error and response mapping |
 | Booking form/submission | Belum teruji end-to-end | booking_form_page.dart | API contract, idempotency and status sync |
@@ -83,12 +84,12 @@ Status meanings:
 
 | Item | Status | Evidence | Notes |
 |---|---|---|---|
-| Shared core analyze/test | Selesai + teruji | Flutter CI #81, run 41362379396, SHA f9bcafc | Core job SUCCESS |
+| Shared core analyze/test | Selesai + teruji | Flutter CI #81, run 41363527847, SHA f9bcafc | Core job SUCCESS |
 | Patient analyze/test | Selesai + teruji | Flutter CI #81, run 41362379396 | Analyze/test SUCCESS |
 | Partner analyze/test | Selesai + teruji | Flutter CI #81, run 41362379396 | Analyze/test SUCCESS |
 | Patient/Partner staging debug APK | Dilewati | TARAN_STAGING_API_BASE_URL unset; build, summary and upload steps SKIPPED | No APK artifact for this run |
 | Patient/Partner unsigned QA AAB compile | Selesai + teruji | Flutter CI #81, run 41362379396 | Both compile and upload SUCCESS; unsigned only |
-| Backend tests | Selesai + teruji | Backend CI #124, run 41362379382, SHA f9bcafc | test job SUCCESS |
+| Backend tests | Selesai + teruji | Backend CI #124, run 41363527786, SHA f9bcafc | test job SUCCESS |
 | Signed Play AAB | Belum tersedia | Gated manual job SKIPPED | Requires owner-managed signing and production URL |
 | Staging integration | Menunggu pemilik | No verified owned HTTPS URL/Actions variable | Do not claim app connected |
 | Physical Android QA | Belum teruji | No device test record | Required before release |
@@ -109,3 +110,10 @@ Status meanings:
 ## Audit conclusion
 
 The backend has tested core marketplace workflows, and both Flutter apps pass analyze/test/build compilation. However, there is no verified staging connection or physical-device E2E evidence. This product is **NO-GO for release/external clinical use** until staging, device QA, privacy/legal, backup/restore, monitoring, signed bundle and owner approval gates are met.
+
+
+## Latest exact-head verification
+Code SHA `30da6557ea6ecd1ed898d7040162c56570d13caa`.
+- Flutter CI #85 / `41363527847`: SUCCESS. Core, Patient, Partner and both unsigned QA AAB jobs SUCCESS; staging APK build/upload steps SKIPPED because no staging URL; signed AAB SKIPPED by design.
+- Backend CI #128 / `41363527786`: SUCCESS. Backend test job SUCCESS, including `HealthEndpointTest`.
+- Patient unsigned QA AAB: 51,331,418 bytes; Partner unsigned QA AAB: 51,194,150 bytes. Neither is signed.
