@@ -82,6 +82,44 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  release-compile:
+    name: Release Android bundle compile (unsigned)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/patient_app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Compile release app bundle (unsigned)
+        env:
+          API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
+        run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
+
+      - name: Upload unsigned release bundle for QA only
+        uses: actions/upload-artifact@v4
+        with:
+          name: taranmidwife-patient-release-unsigned-qa
+          path: apps/patient_app/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
+
   signed-aab:
     name: Signed Google Play AAB
     if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && vars.TARAN_ENABLE_SIGNED_AAB == 'true' }}
