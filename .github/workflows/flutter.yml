@@ -12,68 +12,51 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same branch/PR supersedes the older run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   core:
     name: Core package
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: packages/taran_core
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
       - name: Install dependencies
         run: flutter pub get
-
       - name: Analyze
         run: flutter analyze --no-fatal-infos
-
       - name: Test
         run: flutter test
 
   patient:
     name: Patient Android app
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: apps/patient_app
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
         with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
+          java: 'true'
       - name: Install dependencies
         run: flutter pub get
-
       - name: Analyze
         run: flutter analyze --no-fatal-infos
-
       - name: Test
         run: flutter test
-
       - name: Build debug APK
         env:
           API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
         run: flutter build apk --debug --dart-define=API_BASE_URL="$API_BASE_URL"
-
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -82,29 +65,78 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-
-  partner-release-compile:
-    name: Midwife partner release bundle compile (unsigned)
+  partner:
+    name: Midwife partner Android app
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: apps/partner_app
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: ./.github/actions/setup-flutter
         with:
-          distribution: temurin
-          java-version: '17'
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
+          java: 'true'
       - name: Install dependencies
         run: flutter pub get
       - name: Analyze
         run: flutter analyze --no-fatal-infos
       - name: Test
         run: flutter test
+      - name: Build debug APK
+        env:
+          API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
+        run: flutter build apk --debug --dart-define=API_BASE_URL="$API_BASE_URL"
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: taranmidwife-mitra-debug-apk
+          path: apps/partner_app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  # Release bundles are compiled unsigned for QA only. Analyze and tests already
+  # run in the jobs above, so these jobs only prove that a release build works.
+  release-compile:
+    name: Release Android bundle compile (unsigned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/patient_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
+        with:
+          java: 'true'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Compile release app bundle (unsigned)
+        env:
+          API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
+        run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
+      - name: Upload unsigned release bundle for QA only
+        uses: actions/upload-artifact@v4
+        with:
+          name: taranmidwife-patient-release-unsigned-qa
+          path: apps/patient_app/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
+
+  partner-release-compile:
+    name: Midwife partner release bundle compile (unsigned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/partner_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
+        with:
+          java: 'true'
+      - name: Install dependencies
+        run: flutter pub get
       - name: Compile release app bundle (unsigned)
         env:
           API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
@@ -117,110 +149,31 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  partner:
-    name: Midwife partner Android app
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/partner_app
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze
-        run: flutter analyze --no-fatal-infos
-
-      - name: Test
-        run: flutter test
-
-      - name: Build debug APK
-        env:
-          API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
-        run: flutter build apk --debug --dart-define=API_BASE_URL="$API_BASE_URL"
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: taranmidwife-mitra-debug-apk
-          path: apps/partner_app/build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
-
-  release-compile:
-    name: Release Android bundle compile (unsigned)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/patient_app
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Compile release app bundle (unsigned)
-        env:
-          API_BASE_URL: ${{ vars.TARAN_STAGING_API_BASE_URL }}
-        run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
-
-      - name: Upload unsigned release bundle for QA only
-        uses: actions/upload-artifact@v4
-        with:
-          name: taranmidwife-patient-release-unsigned-qa
-          path: apps/patient_app/build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
-          retention-days: 14
-
+  # Stays "skipped" until the owner enables it (see docs/ANDROID_BUILD.md).
+  # Builds a signed Play bundle for each app; credentials come from Secrets only.
   signed-aab:
-    name: Signed Google Play AAB
+    name: Signed Google Play AAB (${{ matrix.label }})
     if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && vars.TARAN_ENABLE_SIGNED_AAB == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: patient
+            app: patient_app
+            artifact: taranmidwife-patient-release-aab
+          - label: midwife partner
+            app: partner_app
+            artifact: taranmidwife-mitra-release-aab
     defaults:
       run:
-        working-directory: apps/patient_app
+        working-directory: apps/${{ matrix.app }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
         with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
+          java: 'true'
 
       - name: Validate release configuration
         env:
@@ -260,8 +213,8 @@ jobs:
       - name: Upload Google Play AAB
         uses: actions/upload-artifact@v4
         with:
-          name: taranmidwife-patient-release-aab
-          path: apps/patient_app/build/app/outputs/bundle/release/app-release.aab
+          name: ${{ matrix.artifact }}
+          path: apps/${{ matrix.app }}/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
 

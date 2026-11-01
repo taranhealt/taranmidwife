@@ -68,12 +68,12 @@ Route::prefix('v1')->group(function () {
                 Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel']);
             });
         });
-        Route::prefix('midwife')->middleware(EnsureRole::class . ':partner')->group(function () {
+        Route::prefix('midwife')->middleware([EnsureRole::class . ':partner', 'throttle:partner-api'])->group(function () {
             Route::get('profile', [MidwifeProfileController::class, 'show']);
             Route::get('offerings', [\App\Http\Controllers\Api\PartnerOfferingsController::class, 'show']);
             Route::put('offerings', [\App\Http\Controllers\Api\PartnerOfferingsController::class, 'update']);
             Route::put('profile', [MidwifeProfileController::class, 'update']);
-            Route::post('documents', [MidwifeProfileController::class, 'upload']);
+            Route::post('documents', [MidwifeProfileController::class, 'upload'])->middleware('throttle:partner-upload');
             Route::post('verification/submit', [MidwifeProfileController::class, 'submit']);
             Route::post('bookings/{booking}/accept', [MidwifeBookingController::class, 'accept']);
             Route::post('bookings/{booking}/decline', [MidwifeBookingController::class, 'decline']);

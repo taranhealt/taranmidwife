@@ -103,4 +103,40 @@ void main() {
     expect(bookingStatusInfo('CONFIRMED').label, 'Dikonfirmasi');
     expect(cancellableStatuses.contains('COMPLETED'), isFalse);
   });
+
+  test('isValidApiBaseUrl hanya menerima HTTPS bersih', () {
+    expect(isValidApiBaseUrl('https://api.example.test/api/v1'), isTrue);
+    expect(isValidApiBaseUrl(''), isFalse);
+    expect(isValidApiBaseUrl('http://api.example.test/api/v1'), isFalse);
+    expect(isValidApiBaseUrl('https://user:pw@api.example.test'), isFalse);
+    expect(isValidApiBaseUrl('https://api.example.test/api/v1?x=1'), isFalse);
+    expect(isValidApiBaseUrl('https://api.example.test/api/v1#frag'), isFalse);
+  });
+
+  test('respons non-JSON pada galat server tetap menjadi ApiException', () async {
+    final client = MockClient((req) async => http.Response('<html>502</html>', 502));
+    final api = ApiClient(baseUrl: 'https://x.test/api/v1', tokens: MemoryTokenStore(), httpClient: client);
+    try {
+      await api.send('GET', '/me');
+      fail('harus melempar');
+    } on ApiException catch (e) {
+      expect(e.status, 502);
+    }
+  });
+
+  test('401 pada permintaan tanpa auth tidak menghapus token', () async {
+    final tokens = MemoryTokenStore();
+    await tokens.write('abc');
+    var called = false;
+    final client = MockClient((req) async => http.Response('{"message":"salah"}', 401, headers: _json));
+    final api = ApiClient(
+      baseUrl: 'https://x.test/api/v1',
+      tokens: tokens,
+      httpClient: client,
+      onUnauthorized: () => called = true,
+    );
+    await expectLater(api.send('POST', '/auth/login', body: {}, auth: false), throwsA(isA<ApiException>()));
+    expect(await tokens.read(), 'abc');
+    expect(called, isFalse);
+  });
 }

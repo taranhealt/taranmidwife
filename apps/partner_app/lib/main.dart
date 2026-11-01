@@ -9,16 +9,8 @@ import 'widgets/retry_view.dart';
 
 const apiUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
 
-/// API wajib HTTPS tanpa kredensial, query, maupun fragment.
-bool isValidApiUrl(String value) {
-  final u = Uri.tryParse(value);
-  return u != null &&
-      u.scheme == 'https' &&
-      u.host.isNotEmpty &&
-      u.userInfo.isEmpty &&
-      u.query.isEmpty &&
-      u.fragment.isEmpty;
-}
+/// API wajib HTTPS tanpa kredensial, query, maupun fragment (aturan bersama di taran_core).
+bool isValidApiUrl(String value) => isValidApiBaseUrl(value);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
