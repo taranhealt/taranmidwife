@@ -1,45 +1,44 @@
-name: android-bootstrap
+name: Android project verification
+
 on:
   workflow_dispatch:
-    inputs:
-      app:
-        description: 'patient atau mitra'
-        required: true
-        default: patient
-        type: choice
-        options:
-          - patient
-          - mitra
+
 permissions:
-  contents: write
+  contents: read
+
 jobs:
-  bootstrap:
+  verify:
+    name: Verify existing Android project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.50.0'
           channel: stable
-      - name: Buat kerangka Android
+          cache: true
+
+      - name: Verify patient Android project
         run: |
-          if [ "${{ inputs.app }}" = "patient" ]; then
-            DIR=apps/patient_app; APPID=com.taranrainmakergroup.taranmidwife; NAME=taranmidwife; LABEL="TaranMidwife"
+          test -f apps/patient_app/android/app/build.gradle.kts
+          test -f apps/patient_app/android/settings.gradle.kts
+          test -f apps/patient_app/android/gradle/wrapper/gradle-wrapper.properties
+          flutter --version
+          java -version
+
+      - name: Explain missing partner app
+        run: |
+          if [ -d apps/partner_app ]; then
+            echo "Partner app directory exists."
           else
-            DIR=apps/partner_app; APPID=com.taranrainmakergroup.taranmidwife.mitra; NAME=taranmidwife_mitra; LABEL="TaranMidwife Mitra"
+            echo "Partner app has not been created yet; no files were generated or pushed."
           fi
-          cd "$DIR"
-          flutter create --platforms=android --org com.taranrainmakergroup --project-name "$NAME" .
-          MAN=android/app/src/main/AndroidManifest.xml
-          grep -q 'android.permission.INTERNET' "$MAN" || sed -i '0,/<application/ s#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' "$MAN"
-          sed -i "s#android:label=\"[^\"]*\"#android:label=\"$LABEL\"#" "$MAN"
-          G=$(ls android/app/build.gradle.kts android/app/build.gradle 2>/dev/null | head -1)
-          sed -i -E "s#applicationId = \"[^\"]*\"#applicationId = \"$APPID\"#; s#applicationId \"[^\"]*\"#applicationId \"$APPID\"#" "$G"
-          sed -i -E 's#minSdk = flutter\.minSdkVersion#minSdk = maxOf(flutter.minSdkVersion, 24)#; s#minSdkVersion flutter\.minSdkVersion#minSdkVersion Math.max(flutter.minSdkVersion, 24)#' "$G"
-          grep -nE 'applicationId|minSdk' "$G"
-          grep -nE 'INTERNET|android:label' "$MAN"
-      - name: Simpan kerangka ke repositori
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then echo "tidak ada perubahan"; else git commit -m "chore(android): kerangka Android ${{ inputs.app }} dari flutter create"; git push; fi
