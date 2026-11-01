@@ -1,7 +1,7 @@
 # TaranMidwife — Feature Matrix
 
 **Branch audited:** `infra/android-ci-hardening`  
-**Audit baseline:** repository HEAD `1d7a5b267775c52009e539af8cf7c1dc314d0152` (before this audit's follow-up commits).  
+**Audit baseline:** repository HEAD `6299e729964de35f019046d7a0fb754d6d2bd3e2` (latest audited implementation commit).  
 **Scope:** source and automated tests available in this branch. No staging URL, credentials, emulator, or physical-device session was available; therefore no end-to-end claim is made.
 
 Status meanings:
@@ -41,9 +41,9 @@ Status meanings:
 | Booking form and submission | Belum teruji end-to-end | `lib/pages/booking_form_page.dart` | Backend contract, idempotency, booking status |
 | Orders/history/cancellation | Belum teruji end-to-end | `lib/pages/orders_tab.dart` | Status transitions, ownership, expired token |
 | Profile/account deletion | Belum teruji end-to-end | `lib/pages/profile_tab.dart`, API client | Confirm password and deletion behavior |
-| Complaint UI | Scaffold / not established as complete | No confirmed dedicated complaint flow in inspected patient page inventory | Implement and connect only after confirming existing widgets/routes |
+| Complaint UI | Belum teruji end-to-end | `lib/pages/orders_tab.dart` includes category/description form and `POST /complaints`; no dedicated widget/integration test was found | Add widget/API contract test; verify reporter ownership and duplicate response against staging |
 | Patient GPS | Deliberately not implemented | No location permission; policy default `TARAN_REQUIRE_GPS=false` | Keep location optional/off unless policy changes |
-| Reset password in mobile app | Belum ada evidence | Backend exists; no verified mobile reset screens in inspected page inventory | Implement forgot/reset UI and deep-link/token handling |
+| Reset password in Patient App | Scaffold / partial | `lib/pages/auth_page.dart` requests `/auth/forgot-password`; completion is through the emailed web reset page, not an in-app reset screen | Test request UI; verify email delivery and web reset token flow on staging |
 
 ## Partner / Midwife App (Flutter)
 
@@ -62,13 +62,13 @@ Status meanings:
 
 | Item | Status | Evidence | Notes |
 |---|---|---|---|
-| Shared Dart core analyze/test | Selesai + teruji on baseline CI run | Flutter CI run #53 | Re-run required after current commits |
-| Patient app analyze/test/debug APK | Selesai + teruji on baseline CI run | Flutter CI run #53 | No physical-device test implied |
-| Partner app analyze/test/debug APK | Selesai + teruji on baseline CI run | Flutter CI run #53 | No physical-device test implied |
-| Unsigned QA AAB for both apps | Selesai + teruji on baseline CI run | Flutter CI run #53 artifacts | Not signed; not Play Store ready |
-| Backend automated test suite | Selesai + teruji on baseline CI run | Backend CI run #95 | Re-run required after current commits |
+| Shared Dart core analyze/test | Selesai + teruji | Flutter CI run #75, commit `6299e72` | No physical-device test implied |
+| Patient app analyze/test/debug APK | Selesai + teruji | Flutter CI run #75, commit `6299e72` | No physical-device test implied |
+| Partner app analyze/test/debug APK | Selesai + teruji | Flutter CI run #75, commit `6299e72` | No physical-device test implied |
+| Unsigned QA AAB for both apps | Selesai + teruji | Flutter CI run #75 artifacts | Not signed; not Play Store ready |
+| Backend automated test suite | Selesai + teruji | Backend CI run #118, commit `6299e72` | No deployed-staging test implied |
 | Signed Play AAB | Belum tersedia | Signed job intentionally gated; no signing secrets | Requires owner-managed keystore and production URL |
-| Staging integration | Belum teruji / menunggu | No verified staging URL or configured variable available in audit | Do not claim connected |
+| Staging integration | Belum teruji / menunggu | No verified staging URL or configured variable available in audit; CI may build with an empty optional staging variable | Do not claim connected; configure an owned HTTPS staging URL |
 | Physical device QA | Belum teruji | No device test evidence | Required before release |
 
 ## Security audit coverage
