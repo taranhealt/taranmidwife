@@ -91,8 +91,10 @@ class ApiClient {
   }) async {
     final http.Response res;
     try {
-      final streamed = await _http.send(request).timeout(timeout);
-      res = await http.Response.fromStream(streamed);
+      // Bound the complete request lifecycle, including response-body streaming.
+      // Timing out only send() leaves Response.fromStream() able to hang forever
+      // when a proxy or mobile connection stalls after response headers.
+      res = await _http.send(request).then(http.Response.fromStream).timeout(timeout);
     } catch (_) {
       throw ApiException(status: 0, message: networkMessage);
     }
