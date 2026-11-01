@@ -305,6 +305,7 @@ class _ComplaintDialogState extends State<_ComplaintDialog> {
             const SizedBox(height: 12),
             TextField(
               controller: _description,
+              onChanged: (_) => setState(() {}),
               minLines: 3,
               maxLines: 5,
               maxLength: 1000,
