@@ -21,14 +21,12 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// Flutter plugins may set their own compileSdk later in their build script.
-// Override it after each Android library project has completed evaluation.
+// Configure Android library plugins as soon as the Android library plugin is applied.
+// Do not use afterEvaluate: AGP reads compileSdk during project configuration.
 subprojects {
     plugins.withId("com.android.library") {
-        afterEvaluate {
-            extensions.configure<LibraryExtension> {
-                compileSdk = 36
-            }
+        extensions.configure<LibraryExtension> {
+            compileSdk = 36
         }
     }
 }
