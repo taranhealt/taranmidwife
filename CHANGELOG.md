@@ -21,6 +21,8 @@ The project is currently in active pre-release development.
 - Patient Android build now has the same plugin `compileSdk` guard as the partner app.
 - `taran_core`: one shared API base URL validator; `ApiClient` request handling de-duplicated and upload timeout raised to 60 seconds.
 - Partner app data layer split into models, JSON helpers, and repository (public API unchanged).
+- Backend: login performs one hash operation even for unknown emails (no timing difference), with tests.
+- Added `docs/OPEN_DECISIONS.md` (complaint retention wording, patient location capture, reset-email timing).
 - Backend: named rate limiters for partner endpoints (120/min, document upload 20/min) with tests for offerings isolation and validation.
 - Root project overview and repository structure.
 - Patient Flutter application documentation.

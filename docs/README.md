@@ -22,3 +22,4 @@ Welcome to the TaranMidwife documentation.
 - [Data Safety Inventory](../backend/docs/DATA_SAFETY_INVENTORY.md)
 
 Documentation reflects the known project state and should be updated alongside meaningful code changes.
+- [Keputusan terbuka](OPEN_DECISIONS.md): hal kebijakan yang menunggu keputusan pemilik.
