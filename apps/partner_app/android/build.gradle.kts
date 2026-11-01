@@ -21,12 +21,14 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// Apply the compile SDK to every Android library plugin as it is applied.
-// Flutter plugin subprojects do not inherit :app's compileSdk automatically.
+// Flutter plugins may set their own compileSdk later in their build script.
+// Override it after each Android library project has completed evaluation.
 subprojects {
     plugins.withId("com.android.library") {
-        extensions.configure<LibraryExtension> {
-            compileSdk = 36
+        afterEvaluate {
+            extensions.configure<LibraryExtension> {
+                compileSdk = 36
+            }
         }
     }
 }
