@@ -1,3 +1,5 @@
+import com.android.build.gradle.LibraryExtension
+
 allprojects {
     repositories {
         google()
@@ -19,19 +21,12 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// Keep Android library plugins (including file_picker dependencies) aligned
-// with the application's compile SDK. Plugin AAR metadata is checked against
-// each Android subproject, not only :app.
+// Apply the compile SDK to every Android library plugin as it is applied.
+// Flutter plugin subprojects do not inherit :app's compileSdk automatically.
 subprojects {
     plugins.withId("com.android.library") {
-        afterEvaluate {
-            val androidExtension = extensions.findByName("android")
-            val setter = androidExtension?.javaClass?.methods?.firstOrNull {
-                it.name == "setCompileSdk" &&
-                    it.parameterTypes.size == 1 &&
-                    it.parameterTypes[0] == Int::class.javaPrimitiveType
-            }
-            setter?.invoke(androidExtension, 36)
+        extensions.configure<LibraryExtension> {
+            compileSdk = 36
         }
     }
 }
