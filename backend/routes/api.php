@@ -15,7 +15,7 @@ Route::get('health', static function () {
     try {
         DB::connection()->select('select 1');
         return response()->json(['status' => 'ok']);
-    } catch (\\Throwable $exception) {
+    } catch (\Throwable $exception) {
         report($exception);
         return response()->json(['status' => 'unavailable'], 503);
     }
