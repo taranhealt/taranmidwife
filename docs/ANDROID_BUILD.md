@@ -2,7 +2,7 @@
 
 ## Current CI behavior
 
-The `TaranMidwife Flutter CI` workflow checks the shared Dart package and patient app using Flutter 3.50.0 and Java 17. It runs dependency resolution, static analysis, and tests.
+The `TaranMidwife Flutter CI` workflow uses the latest available Flutter stable release and Java 17. It checks the shared Dart package and patient app by running dependency resolution, static analysis, and tests.
 
 A staging debug APK is built only when the repository variable `TARAN_STAGING_API_BASE_URL` is configured. The workflow intentionally does not build an APK against a production-looking default endpoint.
 
@@ -14,6 +14,8 @@ In GitHub, open the repository settings:
 2. Open **Secrets and variables** > **Actions**.
 3. Under **Variables**, add `TARAN_STAGING_API_BASE_URL`.
 4. Set its value to the HTTPS base URL of the staging API, including the API version path when required (for example, `https://staging.example.com/api/v1`).
+
+The patient app rejects a missing, non-HTTPS, credential-bearing, or query/fragment-bearing API base URL at startup. Supply the URL at build time with `--dart-define=API_BASE_URL=https://...`. Never put API credentials or tokens in this URL.
 
 Do not use real patient data in staging until privacy, access control, tenant isolation, audit logging, backup, and security controls have been verified. Use synthetic test data.
 
@@ -51,4 +53,4 @@ Before enabling a signed AAB workflow, add a dedicated workflow step that decode
 
 ## Bootstrap workflow safety
 
-The manual Android bootstrap workflow is now verification-only. It does not generate files, stage changes, commit, or push to the default branch.
+The manual Android bootstrap workflow is verification-only. It does not generate files, stage changes, commit, or push to the default branch.
