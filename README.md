@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub Issues](https://img.shields.io/github/issues/taranhealt/taranmidwife)](https://github.com/taranhealt/taranmidwife/issues)
+[![GitHub Issues](https://img.shields.io/github/issues/taranrainmaker/taranmidwife)](https://github.com/taranrainmaker/taranmidwife/issues)
 
 </div>
 
