@@ -240,64 +240,31 @@ class _ProfilePageState extends State<ProfilePage> {
       OutlinedButton(onPressed:()=>context.read<AuthController>().logout(),child:const Text('Keluar')),
     ])); }
 }
-class OfferingsPage extends StatefulWidget {
-  const OfferingsPage({super.key});
-  @override
-  State<OfferingsPage> createState() => _OfferingsPageState();
-}
+class OfferingsPage extends StatefulWidget { const OfferingsPage({super.key}); @override State<OfferingsPage> createState()=>_OfferingsPageState(); }
 class _OfferingsPageState extends State<OfferingsPage> {
-  Map<String, dynamic>? data;
-  bool loading = true, saving = false;
-  String? error;
-  @override
-  void initState() { super.initState(); load(); }
-  Future<void> load() async {
-    try {
-      final r = await context.read<ApiClient>().send('GET', '/midwife/offerings');
-      if (mounted) setState(() {
-        data = Map<String, dynamic>.from(r['data'] as Map);
-        loading = false; error = null;
-      });
-    } on ApiException catch (e) {
-      if (mounted) setState(() { error = e.displayMessage; loading = false; });
-    }
-  }
-  Future<void> save(bool value) async {
-    setState(() => saving = true);
-    try {
-      await context.read<ApiClient>().send('PUT', '/midwife/offerings',
-        body: {'accepting_requests': value});
-      await load();
-    } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.displayMessage)));
-    } finally {
-      if (mounted) setState(() => saving = false);
-    }
-  }
-  @override
-  Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-    if (error != null) return RetryPage(message: error!, retry: () {
-      setState(() => loading = true); load();
-    });
-    final d = data!;
-    return RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.all(16), children: [
-      SwitchListTile(
-        title: const Text('Menerima permintaan baru'),
-        subtitle: const Text('Status akhir tetap ditentukan aturan server.'),
-        value: d['accepting_requests'] == true,
-        onChanged: saving ? null : save,
-      ),
-      const Divider(),
-      Text('Layanan aktif: ' + ((d['service_ids'] as List? ?? const []).length).toString()),
-      Text('Wilayah layanan: ' + ((d['area_ids'] as List? ?? const []).length).toString()),
-      Text('Hari/jam tersedia: ' + ((d['availability'] as List? ?? const []).length).toString() + ' hari'),
-      Text('Titik layanan: ' + (d['service_point'] == null ? 'Belum diatur' : 'Sudah diatur')),
-    ]));
-  }
+  Map<String,dynamic>? data; List<Map<String,dynamic>> services=[]; List<Map<String,dynamic>> areas=[]; Set<String> selectedServices={}, selectedAreas={}; Map<int,Set<int>> hours={};
+  final lat=TextEditingController(), lng=TextEditingController(), radius=TextEditingController(text:'20'); bool loading=true,saving=false; String? error;
+  static const slots=[8,10,12,14,16]; static const days=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  @override void initState(){super.initState();load();} @override void dispose(){lat.dispose();lng.dispose();radius.dispose();super.dispose();}
+  Future<void> load() async {try{final api=context.read<ApiClient>();final rs=await Future.wait([api.send('GET','/midwife/offerings'),api.send('GET','/services',auth:false),api.send('GET','/areas',auth:false)]);if(!mounted)return;final d=Map<String,dynamic>.from(rs[0]['data'] as Map);final sv=(rs[1]['data'] as List? ?? const[]).whereType<Map>().map((e)=>Map<String,dynamic>.from(e)).toList();final ar=(rs[2]['data'] as List? ?? const[]).whereType<Map>().map((e)=>Map<String,dynamic>.from(e)).toList();final hs=<int,Set<int>>{};for(final v in (d['availability'] as List? ?? const[])){if(v is Map){final day=int.tryParse('${v['weekday']}');if(day!=null)hs[day]=(v['hours'] as List? ?? const[]).map((x)=>int.parse('$x')).toSet();}}final sp=d['service_point'] as Map?;setState(()=>{data=d,services=sv,areas=ar,selectedServices=(d['service_ids'] as List? ?? const[]).map((x)=>'$x').toSet(),selectedAreas=(d['area_ids'] as List? ?? const[]).map((x)=>'$x').toSet(),hours=hs,lat.text=(sp?['lat']??'').toString(),lng.text=(sp?['lng']??'').toString(),radius.text=(sp?['radius_km']??20).toString(),loading=false,error=null});}on ApiException catch(e){if(mounted)setState(()=>{error=e.displayMessage,loading=false});}}
+  Future<void> save() async {setState(()=>saving=true);try{final availability=<Map<String,dynamic>>[];for(var d=0;d<7;d++){final h=hours[d]??{};if(h.isNotEmpty)availability.add({'weekday':d,'hours':h.toList()..sort()});}final a=lat.text.trim(),b=lng.text.trim();Map<String,dynamic>? point;if(a.isNotEmpty||b.isNotEmpty){final x=double.tryParse(a),y=double.tryParse(b),r=int.tryParse(radius.text);if(x==null||y==null||r==null){throw const ApiException(status:422,message:'Koordinat dan radius titik layanan tidak valid.');}point={'lat':x,'lng':y,'radius_km':r};}await context.read<ApiClient>().send('PUT','/midwife/offerings',body:{'service_ids':selectedServices.toList(),'area_ids':selectedAreas.toList(),'availability':availability,'service_point':point});if(mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Pengaturan layanan disimpan.')));await load();}on ApiException catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.displayMessage)));}finally{if(mounted)setState(()=>saving=false);}}
+  Future<void> toggleAccept(bool v) async {setState(()=>saving=true);try{await context.read<ApiClient>().send('PUT','/midwife/offerings',body:{'accepting_requests':v});await load();}on ApiException catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.displayMessage)));}finally{if(mounted)setState(()=>saving=false);}}
+  @override Widget build(BuildContext context){if(loading)return const Center(child:CircularProgressIndicator());if(error!=null)return RetryPage(message:error!,retry:(){setState(()=>loading=true);load();});final d=data!;
+    return RefreshIndicator(onRefresh:load,child:ListView(padding:const EdgeInsets.all(16),children:[
+      SwitchListTile(contentPadding:EdgeInsets.zero,title:const Text('Menerima permintaan baru'),value:d['accepting_requests']==true,onChanged:saving?null:toggleAccept),
+      Text('Pilih layanan',style:Theme.of(context).textTheme.titleMedium),
+      for(final s in services) CheckboxListTile(contentPadding:EdgeInsets.zero,value:selectedServices.contains('${s['id']}'),title:Text('${s['name']??'Layanan'}'),onChanged:saving?null:(v)=>setState(()=>v==true?selectedServices.add('${s['id']}'):selectedServices.remove('${s['id']}'))),
+      const Divider(),Text('Wilayah layanan',style:Theme.of(context).textTheme.titleMedium),
+      for(final a in areas) CheckboxListTile(contentPadding:EdgeInsets.zero,value:selectedAreas.contains('${a['id']}'),title:Text('${a['name']??'Wilayah'}'),onChanged:saving?null:(v)=>setState(()=>v==true?selectedAreas.add('${a['id']}'):selectedAreas.remove('${a['id']}'))),
+      const Divider(),Text('Jadwal tersedia (WIB)',style:Theme.of(context).textTheme.titleMedium),
+      for(var day=0;day<7;day++) ExpansionTile(title:Text(days[day]),children:[Wrap(spacing:4,children:[for(final slot in slots) FilterChip(label:Text('${slot.toString().padLeft(2,'0')}:00'),selected:(hours[day]??{}).contains(slot),onSelected:saving?null:(v)=>setState(()=>{hours.putIfAbsent(day,()=>{});v?hours[day]!.add(slot):hours[day]!.remove(slot);}))])]),
+      const Divider(),Text('Titik layanan',style:Theme.of(context).textTheme.titleMedium),
+      TextField(controller:lat,keyboardType:const TextInputType.numberWithOptions(decimal:true,signed:true),decoration:const InputDecoration(labelText:'Latitude')),
+      TextField(controller:lng,keyboardType:const TextInputType.numberWithOptions(decimal:true,signed:true),decoration:const InputDecoration(labelText:'Longitude')),
+      TextField(controller:radius,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Radius layanan (km)')),
+      const SizedBox(height:16),FilledButton(onPressed:saving?null:save,child:saving?const CircularProgressIndicator():const Text('Simpan pengaturan')),
+    ]));}
 }
-
 class RetryPage extends StatelessWidget {
   const RetryPage({super.key, required this.message, required this.retry});
   final String message;
