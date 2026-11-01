@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -50,6 +52,20 @@ void main() {
     await expectLater(api.send('GET', '/me'), throwsA(isA<ApiException>()));
     expect(called, isTrue);
     expect(await tokens.read(), isNull);
+  });
+
+  test('timeout mencakup pembacaan seluruh response body', () async {
+    final client = _DelayedBodyClient();
+    final api = ApiClient(
+      baseUrl: 'https://x.test/api/v1',
+      tokens: MemoryTokenStore(),
+      httpClient: client,
+      requestTimeout: const Duration(milliseconds: 10),
+    );
+    await expectLater(
+      api.send('GET', '/me', auth: false),
+      throwsA(isA<ApiException>().having((e) => e.status, 'status', 0)),
+    );
   });
 
   test('kegagalan jaringan menjadi ApiException status 0', () async {
@@ -139,4 +155,16 @@ void main() {
     expect(await tokens.read(), 'abc');
     expect(called, isFalse);
   });
+}
+
+
+class _DelayedBodyClient extends http.BaseClient {
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final bytes = utf8.encode('{}');
+    final body = Stream<List<int>>.fromFuture(
+      Future<List<int>>.delayed(const Duration(milliseconds: 100), () => bytes),
+    );
+    return http.StreamedResponse(body, 200);
+  }
 }
