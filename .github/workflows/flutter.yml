@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - infra/android-ci-hardening
   pull_request:
     branches:
       - main
