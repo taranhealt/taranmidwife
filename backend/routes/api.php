@@ -7,7 +7,20 @@ use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\MidwifeBookingController;
 use App\Http\Controllers\Api\MidwifeProfileController;
 use App\Http\Middleware\EnsureRole;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Throwable;
+
+// Minimal readiness endpoint: never exposes configuration, exception or database details.
+Route::get('health', static function () {
+    try {
+        DB::connection()->select('select 1');
+        return response()->json(['status' => 'ok']);
+    } catch (Throwable $exception) {
+        report($exception);
+        return response()->json(['status' => 'unavailable'], 503);
+    }
+})->middleware('throttle:60,1');
 Route::prefix('v1')->group(function () {
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('services', [CatalogController::class, 'services']);
