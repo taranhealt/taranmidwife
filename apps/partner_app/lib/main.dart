@@ -203,6 +203,11 @@ class _BookingsPageState extends State<BookingsPage> {
               style: Theme.of(context).textTheme.titleMedium),
             Text('Kode: ' + (b['code'] ?? id).toString()),
             Text('Jadwal: ' + (b['scheduled_start'] ?? '-').toString()),
+            if (b['distance_km'] != null) Text('Jarak: ' + b['distance_km'].toString() + ' km'),
+            if (b['offer_expires_at'] != null) Text('Batas respons: ' + b['offer_expires_at'].toString()),
+            if (b['address_line'] != null) Text('Alamat kunjungan: ' + b['address_line'].toString()),
+            if (b['landmark'] != null && b['landmark'].toString().isNotEmpty) Text('Patokan: ' + b['landmark'].toString()),
+            if (b['contact_phone'] != null) Text('Kontak pasien: ' + b['contact_phone'].toString()),
             Text('Status: ' + status),
             if (actions.isNotEmpty) Wrap(spacing: 8, children: actions),
           ])));
