@@ -40,3 +40,11 @@ jobs:
       - name: Build APK debug (jika kerangka Android sudah ada)
         if: ${{ hashFiles('apps/patient_app/android/app/build.gradle*') != '' }}
         run: flutter build apk --debug --dart-define=API_BASE_URL=https://midwife.taranrainmaker.biz.id/api/v1
+
+      - name: Upload APK debug
+        uses: actions/upload-artifact@v4
+        with:
+          name: taranmidwife-patient-debug-apk
+          path: apps/patient_app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

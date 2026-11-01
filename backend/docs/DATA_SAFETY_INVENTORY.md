@@ -2,7 +2,7 @@
 
 Status: draf teknis dari skema dan kode backend lokal. BUKAN jawaban final formulir Google Play.
 Jawaban final harus ditinjau dan disetujui pemilik, dan aspek hukumnya NEEDS REVIEW (UU PDP, ketentuan data kesehatan).
-Aplikasi Flutter belum ada, jadi pengumpulan data di sisi aplikasi (SDK, analitik, iklan, crash report) belum bisa diinventarisasi.
+Source code aplikasi Flutter pasien kini tersedia di apps/patient_app/. Namun, inventaris pengumpulan data sisi aplikasi, termasuk SDK, analitik, iklan, crash reporting, penyimpanan lokal, dan izin perangkat, BELUM SELESAI diaudit.
 
 ## Data yang dikumpulkan backend
 | Data | Pemilik | Tujuan | Perlindungan di database | Dihapus saat akun dihapus |

@@ -114,3 +114,81 @@ Tes hanya di PostgreSQL lokal; belum ada uji beban, uji keamanan penetrasi, uji 
 
 - Catatan: latihan restore (27 Okt 2026) dijalankan pada database dev yang kosong (users=0). Ini membuktikan skema dan prosedur pulih, bukan integritas data nyata.
 - CI GitHub (backend) ditulis; BELUM terbukti sampai dijalankan di GitHub.
+
+---
+
+## Pembaruan repositori dan Android (1 November 2026)
+
+Catatan ini melengkapi snapshot status sebelumnya. Status historis
+di atas dipertahankan sebagai catatan perkembangan.
+
+- Source code Flutter aplikasi pasien tersedia di `apps/patient_app/`.
+- Source code shared package tersedia di `packages/taran_core/`.
+- Konfigurasi Android tersedia di `apps/patient_app/android/`.
+- Application ID yang tercantum pada Gradle: `com.taranrainmakergroup.taranmidwife`.
+- Workflow Flutter sebelumnya berhasil membangun APK debug.
+- Workflow kini dikonfigurasi untuk mengunggah APK debug sebagai artifact;
+  keberhasilan upload harus diverifikasi pada run GitHub Actions berikutnya.
+- Build debug bukan signed production AAB.
+- Konfigurasi release Android masih menggunakan debug signing dan harus
+  diperbaiki sebelum publikasi Google Play.
+- Aplikasi mitra Android belum boleh dianggap tersedia hanya berdasarkan
+  dokumentasi backend atau workflow bootstrap.
+- Pengujian end-to-end aplikasi pada perangkat nyata masih diperlukan.
+- Inventaris Data Safety harus mencakup aplikasi Flutter dan dependensinya.
+- Status Google Play tetap NO-GO sampai semua persyaratan rilis diverifikasi.
+
+Catatan ini tidak mengubah hasil pengujian historis backend dan tidak
+menyatakan deployment produksi, kepatuhan hukum, atau kesiapan klinis.
+
+---
+
+## Pembaruan repositori dan Android (1 November 2026)
+
+Catatan ini melengkapi snapshot status sebelumnya. Status historis
+di atas dipertahankan sebagai catatan perkembangan.
+
+- Source code Flutter aplikasi pasien tersedia di `apps/patient_app/`.
+- Source code shared package tersedia di `packages/taran_core/`.
+- Konfigurasi Android tersedia di `apps/patient_app/android/`.
+- Application ID yang tercantum pada Gradle: `com.taranrainmakergroup.taranmidwife`.
+- Workflow Flutter sebelumnya berhasil membangun APK debug.
+- Workflow kini dikonfigurasi untuk mengunggah APK debug sebagai artifact;
+  keberhasilan upload harus diverifikasi pada run GitHub Actions berikutnya.
+- Build debug bukan signed production AAB.
+- Konfigurasi release Android masih menggunakan debug signing dan harus
+  diperbaiki sebelum publikasi Google Play.
+- Aplikasi mitra Android belum boleh dianggap tersedia hanya berdasarkan
+  dokumentasi backend atau workflow bootstrap.
+- Pengujian end-to-end aplikasi pada perangkat nyata masih diperlukan.
+- Inventaris Data Safety harus mencakup aplikasi Flutter dan dependensinya.
+- Status Google Play tetap NO-GO sampai semua persyaratan rilis diverifikasi.
+
+Catatan ini tidak mengubah hasil pengujian historis backend dan tidak
+menyatakan deployment produksi, kepatuhan hukum, atau kesiapan klinis.
+
+---
+
+## Pembaruan repositori dan Android (1 November 2026)
+
+Catatan ini melengkapi snapshot status sebelumnya. Status historis
+di atas dipertahankan sebagai catatan perkembangan.
+
+- Source code Flutter aplikasi pasien tersedia di `apps/patient_app/`.
+- Source code shared package tersedia di `packages/taran_core/`.
+- Konfigurasi Android tersedia di `apps/patient_app/android/`.
+- Application ID yang tercantum pada Gradle: `com.taranrainmakergroup.taranmidwife`.
+- Workflow Flutter sebelumnya berhasil membangun APK debug.
+- Workflow kini dikonfigurasi untuk mengunggah APK debug sebagai artifact;
+  keberhasilan upload harus diverifikasi pada run GitHub Actions berikutnya.
+- Build debug bukan signed production AAB.
+- Konfigurasi release Android masih menggunakan debug signing dan harus
+  diperbaiki sebelum publikasi Google Play.
+- Aplikasi mitra Android belum boleh dianggap tersedia hanya berdasarkan
+  dokumentasi backend atau workflow bootstrap.
+- Pengujian end-to-end aplikasi pada perangkat nyata masih diperlukan.
+- Inventaris Data Safety harus mencakup aplikasi Flutter dan dependensinya.
+- Status Google Play tetap NO-GO sampai semua persyaratan rilis diverifikasi.
+
+Catatan ini tidak mengubah hasil pengujian historis backend dan tidak
+menyatakan deployment produksi, kepatuhan hukum, atau kesiapan klinis.
