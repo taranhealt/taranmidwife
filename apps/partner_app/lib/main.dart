@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taran_core/taran_core.dart';
@@ -209,51 +212,34 @@ class _BookingsPageState extends State<BookingsPage> {
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
-  @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  @override State<ProfilePage> createState() => _ProfilePageState();
 }
 class _ProfilePageState extends State<ProfilePage> {
-  Map<String, dynamic>? data;
-  bool loading = true;
-  String? error;
-  @override
-  void initState() { super.initState(); load(); }
-  Future<void> load() async {
-    try {
-      final r = await context.read<ApiClient>().send('GET', '/midwife/profile');
-      if (mounted) setState(() {
-        data = Map<String, dynamic>.from(r['data'] as Map);
-        loading = false; error = null;
-      });
-    } on ApiException catch (e) {
-      if (mounted) setState(() { error = e.displayMessage; loading = false; });
-    }
-  }
-  @override
-  Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-    if (error != null) return RetryPage(message: error!, retry: () {
-      setState(() => loading = true); load();
-    });
-    final p = data!;
-    final docs = (p['documents'] as List? ?? const []).length;
-    return RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.all(16), children: [
-      Text('Status verifikasi: ' + (p['verification_status'] ?? '-').toString()),
-      Text('NIK: ' + (p['nik'] ?? '-').toString()),
-      Text('Nomor SIP: ' + (p['sip_number'] ?? '-').toString()),
-      Text('Penerbit SIP: ' + (p['sip_issuer'] ?? '-').toString()),
-      Text('Masa berlaku SIP: ' + (p['sip_expires_on'] ?? '-').toString()),
-      Text('Wilayah praktik: ' + (p['practice_area'] ?? '-').toString()),
-      Text('Dokumen terunggah: ' + docs.toString()),
-      if (p['review_reason'] != null) Text('Catatan koreksi: ' + p['review_reason'].toString()),
-      const SizedBox(height: 12),
-      const Text('Pengajuan verifikasi memerlukan dokumen SIP, STR, identitas, dan foto melalui alur unggah aman.'),
-      OutlinedButton(onPressed: () => context.read<AuthController>().logout(),
-        child: const Text('Keluar')),
-    ]));
-  }
+  Map<String, dynamic>? data; bool loading = true, saving = false; String? error;
+  final nik = TextEditingController(), sip = TextEditingController(), issuer = TextEditingController(), expiry = TextEditingController(), area = TextEditingController();
+  @override void initState() { super.initState(); load(); }
+  @override void dispose() { nik.dispose(); sip.dispose(); issuer.dispose(); expiry.dispose(); area.dispose(); super.dispose(); }
+  bool get editable => ['DRAFT','NEEDS_CORRECTION','EXPIRED'].contains(data?['verification_status']);
+  Future<void> load() async { try { final r = await context.read<ApiClient>().send('GET','/midwife/profile'); if (!mounted) return; final p = Map<String,dynamic>.from(r['data'] as Map); setState(() { data=p; loading=false; error=null; nik.clear(); sip.text=(p['sip_number']??'').toString(); issuer.text=(p['sip_issuer']??'').toString(); expiry.text=(p['sip_expires_on']??'').toString(); area.text=(p['practice_area']??'').toString(); }); } on ApiException catch(e) { if(mounted) setState(()=>{error=e.displayMessage, loading=false}); } }
+  Future<void> saveProfile() async { final n=nik.text.trim(); if(n.isNotEmpty && !RegExp(r'^\d{16}$').hasMatch(n)){ ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('NIK harus 16 digit.'))); return; } setState(()=>saving=true); try { final b=<String,dynamic>{'sip_number':sip.text.trim(),'sip_issuer':issuer.text.trim(),'sip_expires_on':expiry.text.trim(),'practice_area':area.text.trim()}; if(n.isNotEmpty)b['nik']=n; await context.read<ApiClient>().send('PUT','/midwife/profile',body:b); await load(); } on ApiException catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.displayMessage)));} finally{if(mounted)setState(()=>saving=false);} }
+  Future<void> upload(String type) async { final r=await FilePicker.platform.pickFiles(type:FileType.custom,allowedExtensions:type=='FACE_PHOTO'?['jpg','jpeg','png']:['jpg','jpeg','png','pdf']); if(r==null||r.files.single.path==null||!mounted)return; setState(()=>saving=true); try{await context.read<ApiClient>().uploadFile('/midwife/documents',field:'file',file:File(r.files.single.path!),fields:{'type':type}); await load();}on ApiException catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.displayMessage)));}finally{if(mounted)setState(()=>saving=false);} }
+  Future<void> submitVerification() async {setState(()=>saving=true);try{await context.read<ApiClient>().send('POST','/midwife/verification/submit');await load();}on ApiException catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.displayMessage)));}finally{if(mounted)setState(()=>saving=false);}}
+  @override Widget build(BuildContext context){if(loading)return const Center(child:CircularProgressIndicator());if(error!=null)return RetryPage(message:error!,retry:(){setState(()=>loading=true);load();}); final p=data!; final docs=(p['documents'] as List? ?? const[]).whereType<Map>().toList(); final types=['SIP','STR','IDENTITY','FACE_PHOTO']; final labels={'SIP':'Surat Izin Praktik (SIP)','STR':'Surat Tanda Registrasi (STR)','IDENTITY':'Identitas diri','FACE_PHOTO':'Foto profil'}; final uploaded=docs.map((d)=>d['type']).toSet();
+    return RefreshIndicator(onRefresh:load,child:ListView(padding:const EdgeInsets.all(16),children:[
+      Text('Status verifikasi: '+(p['verification_status']??'-').toString(),style:Theme.of(context).textTheme.titleMedium),
+      if(p['review_reason']!=null) Text('Catatan koreksi: '+p['review_reason'].toString()),
+      TextField(controller:nik,keyboardType:TextInputType.number,maxLength:16,enabled:editable&&!saving,decoration:InputDecoration(labelText:'NIK (16 digit)',hintText:(p['nik']??'Belum diisi').toString())),
+      TextField(controller:sip,enabled:editable&&!saving,decoration:const InputDecoration(labelText:'Nomor SIP')),
+      TextField(controller:issuer,enabled:editable&&!saving,decoration:const InputDecoration(labelText:'Penerbit SIP')),
+      TextField(controller:expiry,enabled:editable&&!saving,decoration:const InputDecoration(labelText:'Tanggal berlaku SIP (YYYY-MM-DD)')),
+      TextField(controller:area,enabled:editable&&!saving,decoration:const InputDecoration(labelText:'Wilayah praktik')),
+      if(editable) FilledButton(onPressed:saving?null:saveProfile,child:const Text('Simpan profil')),
+      const Divider(), const Text('Dokumen verifikasi'),
+      for(final t in types) ListTile(title:Text(labels[t]!),subtitle:Text(uploaded.contains(t)?'Sudah diunggah':'Belum diunggah'),trailing:editable?IconButton(onPressed:saving?null:()=>upload(t),icon:const Icon(Icons.upload_file)):Icon(uploaded.contains(t)?Icons.check_circle:Icons.lock_outline)),
+      if(editable) FilledButton(onPressed:saving?null:submitVerification,child:const Text('Ajukan verifikasi')),
+      OutlinedButton(onPressed:()=>context.read<AuthController>().logout(),child:const Text('Keluar')),
+    ])); }
 }
-
 class OfferingsPage extends StatefulWidget {
   const OfferingsPage({super.key});
   @override
