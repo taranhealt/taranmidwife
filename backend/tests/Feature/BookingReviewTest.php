@@ -42,7 +42,7 @@ class BookingReviewTest extends TestCase {
         $this->actingAs($patient, 'sanctum')->getJson("/api/v1/bookings/{$booking->id}/review")
             ->assertOk()->assertJsonPath('data.rating', 5);
         $this->getJson("/api/v1/partners/{$partner->id}/rating")
-            ->assertOk()->assertJsonPath('data.review_count', 1)->assertJsonPath('data.average_rating', 5.0)
+            ->assertOk()->assertJsonPath('data.review_count', 1)->assertJsonPath('data.average_rating', 5)
             ->assertJsonMissingPath('data.patient_id')->assertJsonMissingPath('data.comment');
         $this->assertDatabaseHas('audit_events', ['action' => 'booking.review.created', 'entity_id' => $booking->id]);
     }
