@@ -112,9 +112,10 @@ void main() {
     final b = BookingItem.fromJson({
       'id': 'x', 'code': 'TM-1', 'status': 'CONFIRMED',
       'scheduled_start': '2026-11-05T03:00:00+00:00', 'price_amount': 100000,
-      'service': 'Layanan', 'area': 'Wilayah',
+      'service': 'Layanan', 'area': 'Wilayah', 'payment_status': 'PAID',
     });
     expect(b.priceAmount, 100000);
+    expect(b.paymentStatus, 'PAID');
     expect(b.addressLine, isNull);
     expect(bookingStatusInfo('CONFIRMED').label, 'Dikonfirmasi');
     expect(cancellableStatuses.contains('COMPLETED'), isFalse);

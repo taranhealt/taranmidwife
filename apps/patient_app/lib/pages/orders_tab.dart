@@ -79,6 +79,9 @@ class _OrdersTabState extends State<OrdersTab> {
                         children: [
                           Text(formatWib(b.scheduledStart)),
                           StatusBadge(b.status),
+            const SizedBox(height: 8),
+            _paymentSection(),
+                          Text('Pembayaran: ${_paymentLabel(b.paymentStatus)}'),
                         ],
                       ),
                       onTap: () => showModalBottomSheet<void>(
@@ -106,6 +109,31 @@ class _BookingSheet extends StatefulWidget {
 class _BookingSheetState extends State<_BookingSheet> {
   bool _busy = false;
   String? _error;
+  bool _paymentLoading = true;
+  String? _paymentError;
+  Map<String, dynamic>? _payment;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPayment();
+  }
+
+  Future<void> _loadPayment() async {
+    try {
+      final result = await context.read<ApiClient>().send('GET', '/bookings/${widget.booking.id}/payment');
+      if (mounted) setState(() {
+        _payment = result['data'] as Map<String, dynamic>?;
+        _paymentError = null;
+        _paymentLoading = false;
+      });
+    } on ApiException catch (e) {
+      if (mounted) setState(() {
+        _paymentError = e.displayMessage;
+        _paymentLoading = false;
+      });
+    }
+  }
 
   Future<void> _reportComplaint() async {
     final report = await showDialog<Map<String, String>>(
@@ -171,6 +199,35 @@ class _BookingSheetState extends State<_BookingSheet> {
     }
   }
 
+  Widget _paymentSection() {
+    if (_paymentLoading) return const LinearProgressIndicator();
+    if (_paymentError != null) {
+      return Row(children: [
+        Expanded(child: Text('Riwayat pembayaran: $_paymentError')),
+        TextButton(onPressed: () {
+          setState(() => _paymentLoading = true);
+          _loadPayment();
+        }, child: const Text('Coba lagi')),
+      ]);
+    }
+    final data = _payment ?? const <String, dynamic>{};
+    final history = data['history'] as List? ?? const [];
+    final status = data['status'] as String? ?? widget.booking.paymentStatus;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Pembayaran: ${_paymentLabel(status)}', style: const TextStyle(fontWeight: FontWeight.w600)),
+        if (history.isEmpty)
+          const Text('Belum ada perubahan pembayaran yang dicatat.')
+        else
+          for (final item in history)
+            if (item is Map<String, dynamic>)
+              Text('${_paymentLabel(item['to_status'] as String? ?? 'UNPAID')}'
+                  '${item['method'] == null ? '' : ' · ${item['method']}'}'
+                  '${item['occurred_at'] == null ? '' : ' · ${formatWib(DateTime.parse(item['occurred_at'] as String))}'}'),
+      ],
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final b = widget.booking;
@@ -334,3 +391,9 @@ class _ComplaintDialogState extends State<_ComplaintDialog> {
     );
   }
 }
+
+String _paymentLabel(String status) => switch (status) {
+  'PAID' => 'Sudah dibayar',
+  'CANCELLED' => 'Dibatalkan',
+  _ => 'Belum dibayar',
+};

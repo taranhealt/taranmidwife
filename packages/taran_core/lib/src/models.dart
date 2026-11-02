@@ -68,6 +68,7 @@ class BookingItem {
     this.addressLine,
     this.landmark,
     this.contactPhone,
+    this.paymentStatus = 'UNPAID',
   });
 
   factory BookingItem.fromJson(Map<String, dynamic> j) => BookingItem(
@@ -81,6 +82,7 @@ class BookingItem {
         addressLine: j['address_line'] as String?,
         landmark: j['landmark'] as String?,
         contactPhone: j['contact_phone'] as String?,
+        paymentStatus: j['payment_status'] as String? ?? 'UNPAID',
       );
 
   final String id;
@@ -93,4 +95,5 @@ class BookingItem {
   final String? addressLine;
   final String? landmark;
   final String? contactPhone;
+  final String paymentStatus;
 }
