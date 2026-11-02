@@ -7,8 +7,8 @@
 | P1 | Reset timing side-channel | Synchronous email only for active users; generic body does not equalize timing |
 | P1 | Signed document URL needs deployed proxy validation | 5-minute signed URL + authenticated staff route implemented and covered by CI; validate URL generation behind real HTTPS reverse proxy |
 | P1 | Booking reschedule and partner-side payment display | Manual payment ledger API, Patient App status/history and admin console controls are implemented and CI-tested; reschedule policy and Partner App display remain incomplete |
-| P1 | No backup/restore, health endpoint or boot validation | Implement and run restore drill |
-| P1 | No Docker/compose deployment | Not found in audited source |
+| P1 | Encrypted backup/restore scripts are scaffold only | Configure GPG public recipient, daily cron, off-host copy and execute isolated restore test; no restore evidence yet |
+| P1 | Docker/Compose deployment not deployed | Dockerfile/compose/Caddy/boot validator now exist and Backend CI #152 builds/config-validates them; provision VPS and verify TLS/runtime/health |
 | P1 | No FCM/inbox | No device-token lifecycle or inbox implementation |
 | P1 | Search, favorites, address book and reviews | No complete implementation/test evidence |
 | P2 | R8/minify/mapping and CI version metadata | Not configured/proven |
@@ -37,3 +37,10 @@
 - Payment data intentionally excludes arbitrary free-text notes; method/status/actor/timestamp are recorded. No gateway.
 
 - Partner App payment status display tested in Flutter CI #108 (`41375405895`); Backend CI #151 (`41375405844`) also passed on code SHA `9d86e8b296be091f2f387483216d2883b52b4407`.
+
+
+## Docker CI and backup follow-up
+- Backend CI #152 (`41376664500`) passed on exact HEAD `9a32032c848e5af743aa11051c1016ffe72e3333`; Compose validation, Docker image build and PostgreSQL tests passed.
+- Flutter CI #109 (`41376664527`) passed on the same SHA; core/apps/unsigned QA AABs passed; signed AAB skipped.
+- GPG-encrypted backup and isolated restore scripts exist, but cron, off-host replication and a successful real restore drill remain unverified.
+- No external monitoring, VPS deployment or physical device QA evidence.

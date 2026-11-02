@@ -91,3 +91,11 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Backend CI #151 / `41375405844`: SUCCESS.
 - Flutter CI #108 / `41375405895`: SUCCESS; core/patient/partner and unsigned QA AABs SUCCESS; signed AAB skipped; staging APK skipped because URL unset.
 - Exact code SHA `9d86e8b296be091f2f387483216d2883b52b4407`.
+
+
+## Docker deployment scaffold — exact HEAD
+- Added multi-stage `backend/Dockerfile` (Composer dependencies, Vite assets, PHP 8.4 FPM + Nginx runtime), `compose.yaml` (PostgreSQL, app, queue worker, scheduler, Nginx and Caddy automatic HTTPS), fail-fast production environment checks and sanitized `/api/health` endpoint.
+- Backend CI #152 / run `41376664500` on exact HEAD `9a32032c848e5af743aa11051c1016ffe72e3333`: SUCCESS. It validates `docker compose config`, builds production image, checks admin JS syntax and runs PostgreSQL-backed Laravel tests.
+- Flutter CI #109 / run `41376664527` on same SHA: SUCCESS. Core, Patient, Partner and both unsigned QA AAB jobs SUCCESS; signed AAB SKIPPED. Patient AAB 51,346,135 bytes; Partner AAB 51,196,189 bytes.
+- Encrypted GPG backup and isolated restore-test scripts added. They are templates only: no VPS, GPG key, daily cron, off-host storage or real restore drill configured.
+- Remaining: deploy on owner-controlled VPS, set real env/secrets outside Git, configure DNS/Caddy TLS, schedule backup, copy off-host, execute restore drill, smoke test and physical Android QA.

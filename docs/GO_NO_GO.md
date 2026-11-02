@@ -41,3 +41,10 @@ NO-GO until every required gate is Terpenuhi with exact commit, CI, deployment a
 - Backend CI #151 / run `41375405844`: SUCCESS.
 - Flutter CI #108 / run `41375405895`: SUCCESS, all core/app/AAB jobs pass; signed AAB and staging APK intentionally skipped.
 - Exact code SHA `9d86e8b296be091f2f387483216d2883b52b4407`.
+
+
+## Docker deployment and encrypted backup template — exact HEAD
+- HEAD `9a32032c848e5af743aa11051c1016ffe72e3333`.
+- Backend CI #152 / `41376664500`: SUCCESS, including Compose config validation, production Docker image build and PostgreSQL tests.
+- Flutter CI #109 / `41376664527`: SUCCESS; core/apps/unsigned QA AABs pass; signed AAB skipped.
+- Docker stack and scripts are committed; VPS deployment/TLS/restore have not been executed. Encrypted backup scripts are scaffold only until cron, off-host copy and isolated restore are proven.

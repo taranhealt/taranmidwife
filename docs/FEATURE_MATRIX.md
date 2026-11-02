@@ -1,7 +1,7 @@
 # TaranMidwife — Feature Matrix
 
 **Branch:** `infra/android-ci-hardening`  
-**Source audit SHA:** `9d86e8b296be091f2f387483216d2883b52b4407`  
+**Source audit SHA:** `9a32032c848e5af743aa11051c1016ffe72e3333`  
 **Scope:** repository source and automated CI evidence. No staging URL, emulator, physical-device session, or production deployment was available. This matrix does not claim end-to-end readiness.
 
 Status meanings:
@@ -75,8 +75,9 @@ Status meanings:
 | Search/filter/rating/favorites/address book | Belum ada | No complete feature/API/test evidence |
 | Local reminders/education content | Belum ada | No verified encrypted reminder/content API |
 | FCM/device token/in-app inbox | Belum ada | No token lifecycle/inbox implementation evidence |
-| Docker/health/boot validation | Belum ada | No verified deploy stack/health/boot tests |
-| Backup/restore/monitoring | Belum ada | No restore drill or alert evidence |
+| Docker/Compose/health/boot validation | Selesai + teruji build/config CI | `backend/Dockerfile`, `compose.yaml`, Caddy HTTPS reverse proxy, PHP-FPM/Nginx, PostgreSQL, worker, scheduler, fail-fast production env validator; Backend CI #152 builds image and validates Compose | Actual VPS deploy, TLS issuance, persistent volumes and smoke test not run |
+| Encrypted backup/restore | Scaffold; restore not tested | `scripts/backup-db.sh` and `scripts/restore-test.sh` use GPG encryption and isolated restore DB | VPS cron/off-host copy and real restore drill required |
+| Monitoring/alerting | Belum ada | No external uptime/error alert configured |
 | Dependency vulnerability automation | Scaffold / partial | Dependabot configured; audit/outdated gates not yet integrated |
 | R8/minify/mapping upload/version metadata | Belum ada | Not configured/proven by current pipeline |
 
@@ -153,3 +154,10 @@ Admin dashboard now fetches aggregate metrics from `GET /api/v1/admin/metrics`: 
 - Backend CI #151 / run `41375405844`: SUCCESS.
 - Flutter CI #108 / run `41375405895`: SUCCESS; Core, Patient, Partner and both unsigned QA AAB compile/upload jobs SUCCESS; signed AAB SKIPPED; staging APK SKIPPED because staging URL unset.
 - Patient unsigned AAB 51,346,135 bytes; Partner unsigned AAB 51,196,189 bytes.
+
+
+## Docker deployment evidence — current HEAD
+- Exact HEAD `9a32032c848e5af743aa11051c1016ffe72e3333`.
+- Backend CI #152 / run `41376664500`: SUCCESS; includes `docker compose config --quiet`, production Docker image build, JavaScript syntax check and PostgreSQL-backed Laravel tests.
+- Flutter CI #109 / run `41376664527`: SUCCESS; Core, Patient, Partner and both unsigned QA AAB compile/upload jobs SUCCESS; signed AAB SKIPPED by design. Patient AAB 51,346,135 bytes; Partner AAB 51,196,189 bytes.
+- This is build/config CI only. No VPS, DNS, Caddy certificate, app-to-backend staging, backup cron, restore drill or device QA has been performed.
