@@ -17,7 +17,7 @@ class BookingPaymentController extends Controller {
             'history' => BookingPaymentEvent::where('booking_id', $b->id)->orderBy('occurred_at')->get()
                 ->map(fn ($event) => [
                     'from_status' => $event->from_status, 'to_status' => $event->to_status,
-                    'method' => $event->method, 'note' => $event->note,
+                    'method' => $event->method,
                     'occurred_at' => $event->occurred_at->toIso8601String(),
                 ]),
         ]]);
@@ -26,7 +26,6 @@ class BookingPaymentController extends Controller {
         $data = $request->validate([
             'status' => ['required', 'in:PAID,CANCELLED'],
             'method' => ['required_if:status,PAID', 'nullable', 'in:CASH,BANK_TRANSFER,OTHER'],
-            'note' => ['nullable', 'string', 'max:160'],
         ]);
         $actor = $request->user();
         $b = DB::transaction(function () use ($booking, $data, $actor) {
@@ -38,11 +37,14 @@ class BookingPaymentController extends Controller {
             if ($data['status'] === 'PAID' && $b->status !== 'COMPLETED') {
                 throw ValidationException::withMessages(['status' => 'Pembayaran hanya dapat dicatat setelah layanan selesai.']);
             }
+            if ($data['status'] === 'CANCELLED' && $b->status !== 'CANCELLED') {
+                throw ValidationException::withMessages(['status' => 'Status pembayaran dibatalkan hanya untuk pesanan yang dibatalkan.']);
+            }
             $b->payment_status = $data['status'];
             $b->save();
             BookingPaymentEvent::create([
                 'booking_id' => $b->id, 'from_status' => $from, 'to_status' => $data['status'],
-                'method' => $data['method'] ?? null, 'note' => $data['note'] ?? null,
+                'method' => $data['method'] ?? null,
                 'actor_id' => $actor->id, 'occurred_at' => now(),
             ]);
             \App\Models\AuditEvent::record('booking.payment.' . strtolower($data['status']), $actor->id, 'booking', $b->id, 'success');

@@ -191,7 +191,13 @@
     c.appendChild(top);
     c.appendChild(el('div', 'small', (b.service || '-') + ' - ' + (b.area || '-')));
     c.appendChild(el('div', 'small', wib(b.scheduled_start) + ' - ' + rupiah(b.price_amount)));
+    c.appendChild(el('div', 'small', 'Pembayaran: ' + paymentLabel(b.payment_status)));
     if (role !== 'ops_admin') {
+      if (role === 'sysadmin') {
+        var sysPaymentArea = el('div');
+        paymentControls(b, sysPaymentArea);
+        c.appendChild(sysPaymentArea);
+      }
       c.appendChild(el('div', 'note', 'Hanya lihat. Tindakan pesanan ada pada admin operasional.'));
       return c;
     }
@@ -200,6 +206,7 @@
     }
     if (b.contact_phone) { c.appendChild(el('div', 'small', 'Telepon: ' + b.contact_phone)); }
     var area = el('div');
+    paymentControls(b, area);
     var row = el('div', 'row');
     if (b.status === 'REQUESTED') {
       row.appendChild(mkBtn('Saring', '', function () {
@@ -216,6 +223,30 @@
     c.appendChild(area);
     return c;
   }
+
+  function paymentLabel(status) {
+    return status === 'PAID' ? 'Sudah dibayar' : (status === 'CANCELLED' ? 'Dibatalkan' : 'Belum dibayar');
+  }
+  function paymentControls(b, holder) {
+    if (b.payment_status !== 'UNPAID') { return; }
+    if (b.status === 'COMPLETED') {
+      var method = el('select');
+      [['CASH', 'Tunai'], ['BANK_TRANSFER', 'Transfer bank'], ['OTHER', 'Lainnya']].forEach(function (item) {
+        var option = el('option', null, item[1]); option.value = item[0]; method.appendChild(option);
+      });
+      holder.appendChild(method);
+      holder.appendChild(mkBtn('Catat pembayaran diterima', '', function () {
+        return post('/admin/bookings/' + b.id + '/payment', { status: 'PAID', method: method.value },
+          'Pembayaran dicatat.').then(function (r) { if (r.ok) { loadOrders(); } });
+      }));
+    } else if (b.status === 'CANCELLED') {
+      holder.appendChild(mkBtn('Tandai pembayaran dibatalkan', 'secondary', function () {
+        return post('/admin/bookings/' + b.id + '/payment', { status: 'CANCELLED' },
+          'Status pembayaran dibatalkan.').then(function (r) { if (r.ok) { loadOrders(); } });
+      }));
+    }
+  }
+
   function showCandidates(b, area) {
     area.textContent = 'Memuat kandidat...';
     api('/admin/bookings/' + b.id + '/candidates').then(function (r) {

@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->string('from_status', 16)->nullable();
             $table->string('to_status', 16);
             $table->string('method', 24)->nullable();
-            $table->string('note', 160)->nullable();
             $table->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestampTz('occurred_at')->useCurrent();
             $table->index(['booking_id', 'occurred_at']);

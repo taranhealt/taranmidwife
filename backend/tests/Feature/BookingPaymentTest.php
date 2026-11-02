@@ -26,7 +26,7 @@ class BookingPaymentTest extends TestCase {
         $patient = $this->user(UserRole::Patient); $ops = $this->user(UserRole::OpsAdmin);
         $b = $this->completedBooking($patient);
         $this->actingAs($ops, 'sanctum')->postJson("/api/v1/admin/bookings/{$b->id}/payment", [
-            'status' => 'PAID', 'method' => 'BANK_TRANSFER', 'note' => 'Bukti diverifikasi secara manual',
+            'status' => 'PAID', 'method' => 'BANK_TRANSFER',
         ])->assertOk()->assertJsonPath('data.status', 'PAID')->assertJsonPath('data.amount', 125000);
         $this->actingAs($patient, 'sanctum')->getJson("/api/v1/bookings/{$b->id}/payment")
             ->assertOk()->assertJsonPath('data.status', 'PAID')->assertJsonPath('data.amount', 125000)
@@ -51,6 +51,16 @@ class BookingPaymentTest extends TestCase {
         $this->actingAs($ops, 'sanctum')->postJson($url, ['status' => 'CANCELLED'])->assertStatus(422);
         $this->assertDatabaseCount('booking_payment_events', 1);
     }
+    public function test_cancelled_payment_status_requires_cancelled_booking(): void {
+        $patient = $this->user(UserRole::Patient); $ops = $this->user(UserRole::OpsAdmin);
+        $b = $this->completedBooking($patient);
+        $url = "/api/v1/admin/bookings/{$b->id}/payment";
+        $this->actingAs($ops, 'sanctum')->postJson($url, ['status' => 'CANCELLED'])->assertStatus(422);
+        $b->forceFill(['status' => 'CANCELLED'])->save();
+        $this->actingAs($ops, 'sanctum')->postJson($url, ['status' => 'CANCELLED'])
+            ->assertOk()->assertJsonPath('data.status', 'CANCELLED');
+    }
+
     public function test_other_patient_cannot_read_payment_history(): void {
         $patient = $this->user(UserRole::Patient); $other = $this->user(UserRole::Patient);
         $b = $this->completedBooking($patient);
