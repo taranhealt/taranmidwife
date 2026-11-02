@@ -41,7 +41,7 @@ class BookingPaymentTest extends TestCase {
         ])->assertStatus(422);
         $this->actingAs($patient, 'sanctum')->postJson("/api/v1/admin/bookings/{$b->id}/payment", [
             'status' => 'PAID', 'method' => 'CASH',
-        ])->assertStatus(404);
+        ])->assertStatus(403);
         $this->assertSame('UNPAID', $b->fresh()->payment_status);
     }
     public function test_payment_status_is_final_and_cannot_be_overwritten(): void {
