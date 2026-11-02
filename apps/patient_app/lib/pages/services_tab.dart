@@ -18,6 +18,10 @@ class _ServicesTabState extends State<ServicesTab> {
   List<ServiceItem>? _items;
   String? _error;
   bool _loading = true;
+  final Set<String> _favorites = <String>{};
+  bool _favoritesLoading = false;
+  bool _showFavoritesOnly = false;
+  String? _favoriteError;
   String? _filterError;
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _minPriceController = TextEditingController();
@@ -27,6 +31,7 @@ class _ServicesTabState extends State<ServicesTab> {
   void initState() {
     super.initState();
     _load();
+    _loadFavorites();
   }
 
   @override
@@ -35,6 +40,41 @@ class _ServicesTabState extends State<ServicesTab> {
     _minPriceController.dispose();
     _maxPriceController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+      final result = await context.read<ApiClient>().send('GET', '/favorites');
+      final ids = (result['data'] as List? ?? const [])
+          .map((item) => (item as Map<String, dynamic>)['id'] as String)
+          .toSet();
+      if (mounted) setState(() { _favorites..clear()..addAll(ids); _favoriteError = null; });
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _favoriteError = e.displayMessage);
+    }
+  }
+
+  Future<void> _toggleFavorite(ServiceItem service) async {
+    if (_favoritesLoading) return;
+    setState(() { _favoritesLoading = true; _favoriteError = null; });
+    final wasFavorite = _favorites.contains(service.id);
+    try {
+      if (wasFavorite) {
+        await context.read<ApiClient>().send('DELETE', '/favorites/${service.id}');
+        if (mounted) setState(() => _favorites.remove(service.id));
+      } else {
+        await context.read<ApiClient>().send('POST', '/favorites', body: {'service_id': service.id});
+        if (mounted) setState(() => _favorites.add(service.id));
+      }
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _favoriteError = e.displayMessage);
+    } finally {
+      if (mounted) setState(() => _favoritesLoading = false);
+    }
+  }
+
+  Future<void> _refresh() async {
+    await Future.wait([_load(), _loadFavorites()]);
   }
 
   Future<void> _load() async {
@@ -104,9 +144,10 @@ class _ServicesTabState extends State<ServicesTab> {
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null) return RetryView(message: _error!, onRetry: _retry);
-    final items = _items ?? const <ServiceItem>[];
+    final allItems = _items ?? const <ServiceItem>[];
+    final items = _showFavoritesOnly ? allItems.where((item) => _favorites.contains(item.id)).toList() : allItems;
     return RefreshIndicator(
-      onRefresh: _load,
+      onRefresh: _refresh,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -156,12 +197,21 @@ class _ServicesTabState extends State<ServicesTab> {
 
           const _CoverageCard(),
           const SizedBox(height: 12),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Tampilkan favorit saja'),
+            value: _showFavoritesOnly,
+            onChanged: (value) => setState(() => _showFavoritesOnly = value),
+          ),
+          if (_favoriteError != null)
+            Text('Favorit: $_favoriteError', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          const SizedBox(height: 8),
           if (items.isEmpty)
             const Padding(
               padding: EdgeInsets.all(24),
-              child: Center(child: Text('Tidak ada layanan yang sesuai dengan pencarian atau rentang harga.')),
+              child: Center(child: Text(_showFavoritesOnly ? 'Belum ada layanan favorit.' : 'Tidak ada layanan yang sesuai dengan pencarian atau rentang harga.')),
             ),
-          for (final s in items) _ServiceCard(service: s, onBooked: widget.onBooked),
+          for (final s in items) _ServiceCard(service: s, onBooked: widget.onBooked, isFavorite: _favorites.contains(s.id), favoriteBusy: _favoritesLoading, onFavoriteToggle: () => _toggleFavorite(s)),
         ],
       ),
     );
@@ -169,9 +219,12 @@ class _ServicesTabState extends State<ServicesTab> {
 }
 
 class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({required this.service, required this.onBooked});
+  const _ServiceCard({required this.service, required this.onBooked, required this.isFavorite, required this.favoriteBusy, required this.onFavoriteToggle});
   final ServiceItem service;
   final VoidCallback onBooked;
+  final bool isFavorite;
+  final bool favoriteBusy;
+  final VoidCallback onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +234,14 @@ class _ServiceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(service.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Row(children: [
+              Expanded(child: Text(service.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+              IconButton(
+                tooltip: isFavorite ? 'Hapus dari favorit' : 'Simpan ke favorit',
+                onPressed: favoriteBusy ? null : onFavoriteToggle,
+                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+              ),
+            ]),
             if (service.description != null && service.description!.isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(service.description!),
