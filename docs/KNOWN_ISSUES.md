@@ -14,7 +14,7 @@
 | P2 | R8/minify/mapping and CI version metadata | Not configured/proven |
 | P2 | Composer audit / pub outdated CI gates | Dependabot weekly config exists; audit/outdated gates not yet integrated |
 | P2 | Strict CORS/CSP | Exact allowlist/CSP not verified |
-| P2 | Admin metrics/dashboard | API primitives/admin shell exist; dashboard metrics not proven |
+| P2 | Admin metrics browser QA | Aggregate endpoint and UI cards implemented; browser/device E2E still needed |
 
 ## CI follow-up
 
@@ -23,3 +23,5 @@
 - Since `TARAN_STAGING_API_BASE_URL` is unset, the Patient and Partner staging APK build/summary/upload steps are intentionally skipped. No APK is provided by that run.
 - Both unsigned QA AAB compile/upload jobs succeeded; `/api/health` is covered by success and sanitized failure regression tests. These are not signed Play Store artifacts.
 - Workflow includes AAB artifact size/SHA-256 summaries; APK summary executes only when staging is configured.
+
+- Admin metrics API/UI is implemented on latest code; API role/privacy regression test passed in Backend CI #132. Browser interaction and accessibility still require device/browser QA.

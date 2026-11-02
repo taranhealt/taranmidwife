@@ -45,3 +45,12 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Added unauthenticated `GET /api/health` readiness endpoint. It checks database connectivity and returns only `{"status":"ok"}` or `{"status":"unavailable"}`; no exception/configuration details are returned.
 - Added `HealthEndpointTest` for healthy response and sanitized 503 response.
 - Backend CI #128 passed on code SHA `30da6557ea6ecd1ed898d7040162c56570d13caa`.
+
+
+## Admin dashboard metrics increment
+- Added role-protected `GET /api/v1/admin/metrics` for ops_admin, reviewer and sysadmin.
+- Returns only aggregate counts: bookings total/open, active partners and open complaints.
+- Added responsive admin dashboard metric cards; no patient contact/address/complaint content is returned by this endpoint.
+- Added regression test for role denial and PII-free aggregate output.
+- Backend CI #132 / 41364515569: SUCCESS.
+- Flutter CI #89 / 41364515586: SUCCESS; staging APK steps skipped because staging URL remains unset; both unsigned AABs compiled and uploaded.

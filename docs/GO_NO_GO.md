@@ -10,6 +10,7 @@ Decision snapshot: 2 November 2026. Code audit SHA: `30da6557ea6ecd1ed898d704016
 | Unsigned QA AABs | Terpenuhi | Flutter CI #81, both Patient and Partner compile/upload SUCCESS; not signed |
 | Backend automated tests | Terpenuhi | Backend CI #128, run 41363527786, SHA 30da655, test SUCCESS |
 | Non-sensitive `/api/health` database readiness endpoint | Terpenuhi | Backend `HealthEndpointTest`: healthy response and sanitized 503 on DB exception |
+| Admin metrics API role/privacy regression | Terpenuhi | Backend CI #132; AdminDashboardMetricsTest verifies role denial and no PII in aggregate response |
 | Full backend integration flow | Belum | Full register-to-visit/manual-payment/review/delete E2E not evidenced |
 | Staging API configured and apps connected | Menunggu pemilik | No verified owned HTTPS staging URL or Actions variable |
 | Physical Android QA | Belum | No device execution record |
