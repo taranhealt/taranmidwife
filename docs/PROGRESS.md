@@ -105,3 +105,11 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Reworked `scripts/backup-db.sh` to Bash strict mode (`set -euo pipefail`), separate protected temporary database/private-file archives, encrypt both with GPG, checksum outputs and enforce retention.
 - Added shell syntax checks to backend CI for backup/restore/entrypoint scripts; ensure private storage directory exists in Docker image.
 - These changes require CI verification on the resulting exact commit; no real backup/restore claim until owner VPS drill.
+
+
+## Booking review feature implementation (pending CI)
+- Added a one-review-per-booking backend schema with patient/partner ownership, 1–5 rating constraint and encrypted optional comment.
+- API permits only the owning patient to review a COMPLETED booking with an active partner assignment; duplicate submissions return 409. Audit event stores booking reference only.
+- Public partner rating endpoint returns only aggregate average/count and never returns patient identity or review comment.
+- Patient App completed-booking detail now loads review state and provides a one-time rating/comment form with loading/error/double-submit guards.
+- Backend and Flutter CI must pass on the resulting exact SHA before this feature can be marked tested; partner public profile display and device QA remain outstanding.

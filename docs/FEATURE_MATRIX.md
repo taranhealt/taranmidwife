@@ -72,7 +72,8 @@ Status meanings:
 | Reschedule/cancellation policy | Belum ada | No complete reschedule workflow/policy test |
 | Automatic offer expiry | Backend command exists; scheduler belum teruji | Command/schedule exists; no deployed worker heartbeat |
 | Manual payment ledger/history | Selesai + teruji API; Patient App + admin console UI CI-verified | BookingPaymentController, payment events, locked one-way status, role guards, audit events; BookingPaymentTest; Patient orders detail displays payment status/history; admin console records cash/bank/other or cancellation | Physical device/admin browser QA and deployed staging; Partner App status display added; detailed history remains Patient App/admin only |
-| Search/filter/rating/favorites/address book | Belum ada | No complete feature/API/test evidence |
+| Booking reviews (one per completed booking) | Scaffold until CI verified | Backend ownership/completion/duplicate guards, encrypted optional comment, anonymous aggregate rating endpoint; Patient App review form in completed booking detail | Partner public profile rating integration and device QA remain |
+| Search/filter/favorites/address book | Belum ada | No complete feature/API/test evidence |
 | Local reminders/education content | Belum ada | No verified encrypted reminder/content API |
 | FCM/device token/in-app inbox | Belum ada | No token lifecycle/inbox implementation evidence |
 | Docker/Compose/health/boot validation | Selesai + teruji build/config CI | `backend/Dockerfile`, `compose.yaml`, Caddy HTTPS reverse proxy, PHP-FPM/Nginx, PostgreSQL, worker, scheduler, fail-fast production env validator; Backend CI #152 builds image and validates Compose | Actual VPS deploy, TLS issuance, persistent volumes and smoke test not run |

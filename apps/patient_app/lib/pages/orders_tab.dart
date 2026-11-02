@@ -110,11 +110,49 @@ class _BookingSheetState extends State<_BookingSheet> {
   bool _paymentLoading = true;
   String? _paymentError;
   Map<String, dynamic>? _payment;
+  bool _reviewLoading = false;
+  bool _reviewSubmitting = false;
+  String? _reviewError;
+  Map<String, dynamic>? _review;
+  int _rating = 5;
+  final TextEditingController _reviewComment = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadPayment();
+    if (widget.booking.status == 'COMPLETED') _loadReview();
+  }
+
+  @override
+  void dispose() {
+    _reviewComment.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadReview() async {
+    setState(() => _reviewLoading = true);
+    try {
+      final result = await context.read<ApiClient>().send('GET', '/bookings/\${widget.booking.id}/review');
+      if (mounted) setState(() { _review = result['data'] as Map<String, dynamic>?; _reviewError = null; _reviewLoading = false; });
+    } on ApiException catch (e) {
+      if (mounted) setState(() { _reviewError = e.displayMessage; _reviewLoading = false; });
+    }
+  }
+
+  Future<void> _submitReview() async {
+    if (_reviewSubmitting || _review != null) return;
+    setState(() { _reviewSubmitting = true; _reviewError = null; });
+    try {
+      final result = await context.read<ApiClient>().send('POST', '/bookings/\${widget.booking.id}/review', body: {
+        'rating': _rating, 'comment': _reviewComment.text.trim().isEmpty ? null : _reviewComment.text.trim(),
+      });
+      if (mounted) setState(() { _review = result['data'] as Map<String, dynamic>?; _reviewError = null; });
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _reviewError = e.displayMessage);
+    } finally {
+      if (mounted) setState(() => _reviewSubmitting = false);
+    }
   }
 
   Future<void> _loadPayment() async {
@@ -231,6 +269,37 @@ class _BookingSheetState extends State<_BookingSheet> {
     );
   }
   @override
+  Widget _reviewSection() {
+    if (widget.booking.status != 'COMPLETED') return const SizedBox.shrink();
+    if (_reviewLoading) return const LinearProgressIndicator();
+    if (_reviewError != null && _review == null) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Ulasan: $_reviewError'),
+        TextButton(onPressed: _loadReview, child: const Text('Coba lagi')),
+      ]);
+    }
+    if (_review != null) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('Terima kasih atas ulasan Anda.'),
+        Text('Rating Anda: ${_review!['rating']}/5'),
+      ]);
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Bagaimana pengalaman layanan Anda?', style: TextStyle(fontWeight: FontWeight.w600)),
+      Row(children: [for (var star = 1; star <= 5; star++) IconButton(
+        tooltip: '$star dari 5 bintang',
+        onPressed: _reviewSubmitting ? null : () => setState(() => _rating = star),
+        icon: Icon(star <= _rating ? Icons.star : Icons.star_border),
+      )]),
+      TextField(controller: _reviewComment, maxLength: 500, maxLines: 3,
+        decoration: const InputDecoration(labelText: 'Komentar (opsional)', alignLabelWithHint: true)),
+      if (_reviewError != null) Text(_reviewError!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+      SizedBox(width: double.infinity, child: FilledButton(
+        onPressed: _reviewSubmitting ? null : _submitReview,
+        child: _reviewSubmitting ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator()) : const Text('Kirim ulasan'),
+      )),
+    ]);
+  }
   Widget build(BuildContext context) {
     final b = widget.booking;
     return SafeArea(
@@ -251,6 +320,8 @@ class _BookingSheetState extends State<_BookingSheet> {
             StatusBadge(b.status),
             const SizedBox(height: 8),
             _paymentSection(),
+            const SizedBox(height: 12),
+            _reviewSection(),
             if (_error != null) ...[
               const SizedBox(height: 8),
               Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminPartnerController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\BookingPaymentController;
+use App\Http\Controllers\Api\BookingReviewController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\MidwifeBookingController;
 use App\Http\Controllers\Api\MidwifeProfileController;
@@ -23,6 +24,7 @@ Route::get('health', static function () {
     }
 })->middleware('throttle:60,1');
 Route::prefix('v1')->group(function () {
+    Route::get('partners/{partner}/rating', [BookingReviewController::class, 'partnerRating'])->middleware('throttle:60,1');
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('services', [CatalogController::class, 'services']);
         Route::get('areas', [CatalogController::class, 'areas']);
@@ -47,6 +49,8 @@ Route::prefix('v1')->group(function () {
             Route::get('bookings/{booking}/payment', [BookingPaymentController::class, 'show']);
         });
         Route::middleware(EnsureRole::class . ':patient')->group(function () {
+            Route::get('bookings/{booking}/review', [BookingReviewController::class, 'show']);
+            Route::post('bookings/{booking}/review', [BookingReviewController::class, 'store'])->middleware('throttle:10,1');
             Route::post('bookings', [BookingController::class, 'store'])->middleware('throttle:booking-create');
             Route::get('coverage', [\App\Http\Controllers\Api\CoverageController::class, 'check']);
             Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
