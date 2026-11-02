@@ -30,7 +30,8 @@ class AdminUiSupportTest extends TestCase {
         return PartnerProfile::create(['user_id' => $u->id, 'verification_status' => 'APPROVED', 'sip_expires_on' => $sip]);
     }
     public function test_admin_page_loads_without_third_party_resources(): void {
-        $html = $this->get('/admin')->assertOk()->assertSee('Admin')->assertSee('/js/admin.js', false)->getContent();
+        $html = $this->get('/admin')->assertOk()->assertSee('Admin')->assertSee('/js/admin.js', false)->assertSee('id="metrics"', false)
+            ->assertSee('id="c-status"', false)->assertDontSee('segera rilis')->getContent();
         $this->assertFileExists(public_path('js/admin.js'));
         $this->assertStringNotContainsString('unpkg.com', $html);
         $this->assertStringNotContainsString('openstreetmap', $html);

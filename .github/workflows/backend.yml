@@ -30,6 +30,8 @@ jobs:
           php-version: '8.4'
           extensions: mbstring, pdo_pgsql, pgsql, xml, ctype, fileinfo, tokenizer, openssl
           coverage: none
+      - name: Check admin console JavaScript syntax
+        run: node --check public/js/admin.js
       - run: composer install --no-interaction --prefer-dist
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
