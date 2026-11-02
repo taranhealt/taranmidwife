@@ -44,3 +44,5 @@
 - Flutter CI #109 (`41376664527`) passed on the same SHA; core/apps/unsigned QA AABs passed; signed AAB skipped.
 - GPG-encrypted backup and isolated restore scripts exist, but cron, off-host replication and a successful real restore drill remain unverified.
 - No external monitoring, VPS deployment or physical device QA evidence.
+
+- Backup script pipeline failure propagation was tightened: strict Bash mode and separate temporary archives avoid masking tar/pg_dump errors in a pipe. CI shell syntax validation added; actual encrypted backup/restore still requires a VPS and owner-held GPG key.

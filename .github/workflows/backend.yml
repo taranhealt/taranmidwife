@@ -38,6 +38,9 @@ jobs:
           coverage: none
       - name: Check admin console JavaScript syntax
         run: node --check public/js/admin.js
+      - name: Check deployment and backup shell syntax
+        working-directory: .
+        run: bash -n scripts/backup-db.sh && sh -n scripts/restore-test.sh backend/docker/entrypoint.sh
       - run: composer install --no-interaction --prefer-dist
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test

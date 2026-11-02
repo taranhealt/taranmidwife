@@ -48,3 +48,10 @@ NO-GO until every required gate is Terpenuhi with exact commit, CI, deployment a
 - Backend CI #152 / `41376664500`: SUCCESS, including Compose config validation, production Docker image build and PostgreSQL tests.
 - Flutter CI #109 / `41376664527`: SUCCESS; core/apps/unsigned QA AABs pass; signed AAB skipped.
 - Docker stack and scripts are committed; VPS deployment/TLS/restore have not been executed. Encrypted backup scripts are scaffold only until cron, off-host copy and isolated restore are proven.
+
+
+## Current exact HEAD — Docker and backup script hardening
+- HEAD at this documentation snapshot: `53c3d4d175ecdbd8b89efb564070737296b2d935`.
+- Backend CI #153 / `41377256076`: SUCCESS; Compose validation, production image build, PostgreSQL tests passed.
+- Flutter CI #110 / `41377256258`: SUCCESS; Core/Patient/Partner and unsigned AABs passed; signed AAB skipped.
+- Encrypted backup scripts exist but no VPS cron/off-host copy/restore drill is proven. Docker image/config is CI-built only, not deployed.

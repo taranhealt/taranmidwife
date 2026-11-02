@@ -99,3 +99,9 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Flutter CI #109 / run `41376664527` on same SHA: SUCCESS. Core, Patient, Partner and both unsigned QA AAB jobs SUCCESS; signed AAB SKIPPED. Patient AAB 51,346,135 bytes; Partner AAB 51,196,189 bytes.
 - Encrypted GPG backup and isolated restore-test scripts added. They are templates only: no VPS, GPG key, daily cron, off-host storage or real restore drill configured.
 - Remaining: deploy on owner-controlled VPS, set real env/secrets outside Git, configure DNS/Caddy TLS, schedule backup, copy off-host, execute restore drill, smoke test and physical Android QA.
+
+
+## Backup pipeline hardening (next exact code commit)
+- Reworked `scripts/backup-db.sh` to Bash strict mode (`set -euo pipefail`), separate protected temporary database/private-file archives, encrypt both with GPG, checksum outputs and enforce retention.
+- Added shell syntax checks to backend CI for backup/restore/entrypoint scripts; ensure private storage directory exists in Docker image.
+- These changes require CI verification on the resulting exact commit; no real backup/restore claim until owner VPS drill.
