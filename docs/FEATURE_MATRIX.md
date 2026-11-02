@@ -1,7 +1,7 @@
 # TaranMidwife — Feature Matrix
 
 **Branch:** `infra/android-ci-hardening`  
-**Source audit SHA:** `49d5f09cd0d1b827a8481eb57add0fafdf41ce13`  
+**Source audit SHA:** `9d86e8b296be091f2f387483216d2883b52b4407`  
 **Scope:** repository source and automated CI evidence. No staging URL, emulator, physical-device session, or production deployment was available. This matrix does not claim end-to-end readiness.
 
 Status meanings:
@@ -71,7 +71,7 @@ Status meanings:
 | Partner status/reason UX | Backend available; Flutter belum teruji | API returns verification status/review reason; no device evidence |
 | Reschedule/cancellation policy | Belum ada | No complete reschedule workflow/policy test |
 | Automatic offer expiry | Backend command exists; scheduler belum teruji | Command/schedule exists; no deployed worker heartbeat |
-| Manual payment ledger/history | Selesai + teruji API; Patient App + admin console UI CI-verified | BookingPaymentController, payment events, locked one-way status, role guards, audit events; BookingPaymentTest; Patient orders detail displays payment status/history; admin console records cash/bank/other or cancellation | Physical device/admin browser QA and deployed staging; Partner App display not yet added |
+| Manual payment ledger/history | Selesai + teruji API; Patient App + admin console UI CI-verified | BookingPaymentController, payment events, locked one-way status, role guards, audit events; BookingPaymentTest; Patient orders detail displays payment status/history; admin console records cash/bank/other or cancellation | Physical device/admin browser QA and deployed staging; Partner App status display added; detailed history remains Patient App/admin only |
 | Search/filter/rating/favorites/address book | Belum ada | No complete feature/API/test evidence |
 | Local reminders/education content | Belum ada | No verified encrypted reminder/content API |
 | FCM/device token/in-app inbox | Belum ada | No token lifecycle/inbox implementation evidence |
@@ -144,3 +144,12 @@ Admin dashboard now fetches aggregate metrics from `GET /api/v1/admin/metrics`: 
 - Flutter CI #104 / run `41374239341`: SUCCESS; Core, Patient, Partner and both unsigned QA AAB compile/upload jobs SUCCESS; signed AAB SKIPPED by design; staging APK skipped because staging URL unset.
 - Patient unsigned QA AAB: 51,346,135 bytes. Partner unsigned QA AAB: 51,194,150 bytes.
 - Ledger stores only status, method, actor and timestamp (no free-text payment note). PAID can be recorded only after COMPLETED; CANCELLED only for cancelled bookings; transitions are final through normal admin workflow. No gateway or payment processing.
+
+
+## Partner-side payment status visibility — exact-head verification
+- Code SHA: `9d86e8b296be091f2f387483216d2883b52b4407`.
+- PartnerBooking parses `payment_status` (safe default UNPAID) and Partner App booking cards display translated payment status.
+- Added midwife model regression test.
+- Backend CI #151 / run `41375405844`: SUCCESS.
+- Flutter CI #108 / run `41375405895`: SUCCESS; Core, Patient, Partner and both unsigned QA AAB compile/upload jobs SUCCESS; signed AAB SKIPPED; staging APK SKIPPED because staging URL unset.
+- Patient unsigned AAB 51,346,135 bytes; Partner unsigned AAB 51,196,189 bytes.

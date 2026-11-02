@@ -82,3 +82,12 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Flutter CI #104 / run `41374239341`: SUCCESS; Patient/Partner/Core and both unsigned QA AABs SUCCESS; signed AAB skipped; staging APK skipped because URL unset.
 - Exact code SHA `49d5f09cd0d1b827a8481eb57add0fafdf41ce13`.
 - Remaining: partner-side payment display, real browser/device verification and full staging flow.
+
+
+## Partner App payment status visibility
+- PartnerBooking now parses `payment_status`, defaulting to UNPAID for older/missing payloads.
+- Partner booking cards display Indonesian payment status. Detailed payment history remains visible in Patient App and admin API; partner-side history list is not implemented.
+- Added regression test for PAID and safe UNPAID default.
+- Backend CI #151 / `41375405844`: SUCCESS.
+- Flutter CI #108 / `41375405895`: SUCCESS; core/patient/partner and unsigned QA AABs SUCCESS; signed AAB skipped; staging APK skipped because URL unset.
+- Exact code SHA `9d86e8b296be091f2f387483216d2883b52b4407`.

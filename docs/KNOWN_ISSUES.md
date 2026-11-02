@@ -18,7 +18,7 @@
 
 ## CI follow-up
 
-- Latest code SHA: `49d5f09cd0d1b827a8481eb57add0fafdf41ce13`.
+- Latest code SHA: `9d86e8b296be091f2f387483216d2883b52b4407`.
 - Flutter CI #85 (41363527847) and Backend CI #128 (41363527786) completed successfully.
 - Since `TARAN_STAGING_API_BASE_URL` is unset, the Patient and Partner staging APK build/summary/upload steps are intentionally skipped. No APK is provided by that run.
 - Both unsigned QA AAB compile/upload jobs succeeded; `/api/health` is covered by success and sanitized failure regression tests. These are not signed Play Store artifacts.
@@ -35,3 +35,5 @@
 - Backend CI #147 / run `41374239305`: SUCCESS, 139 tests / 837 assertions.
 - Flutter CI #104 / run `41374239341`: SUCCESS; patient/partner/core and both unsigned AABs SUCCESS.
 - Payment data intentionally excludes arbitrary free-text notes; method/status/actor/timestamp are recorded. No gateway.
+
+- Partner App payment status display tested in Flutter CI #108 (`41375405895`); Backend CI #151 (`41375405844`) also passed on code SHA `9d86e8b296be091f2f387483216d2883b52b4407`.

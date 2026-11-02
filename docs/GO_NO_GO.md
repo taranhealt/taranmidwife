@@ -1,6 +1,6 @@
 # GO / NO-GO
 
-Decision snapshot: 2 November 2026. Code audit SHA: `49d5f09cd0d1b827a8481eb57add0fafdf41ce13`. Overall **NO-GO for release or external clinical use**.
+Decision snapshot: 2 November 2026. Code audit SHA: `9d86e8b296be091f2f387483216d2883b52b4407`. Overall **NO-GO for release or external clinical use**.
 
 | Criterion | Status | Evidence/blocker |
 |---|---|---|
@@ -13,7 +13,7 @@ Decision snapshot: 2 November 2026. Code audit SHA: `49d5f09cd0d1b827a8481eb57ad
 | Admin metrics API role/privacy regression | Terpenuhi | Backend CI #132; AdminDashboardMetricsTest verifies role denial and no PII in aggregate response |
 | Signed partner document URL (5-minute expiry, signature and staff authorization) | Terpenuhi | PartnerVerificationTest on Backend CI #137 (41366219710), exact SHA a5e5f4e |
 | Admin console duplicate-action guard | Terpenuhi | AdminUiSupportTest on Backend CI #139, run 41367194962 |
-| Manual payment ledger, one-way status transitions, role/booking-state guards and audit history | Terpenuhi at API/UI code level | BookingPaymentTest + AdminUiSupportTest, Backend CI #147 run 41374239305 (139 tests/837 assertions); Flutter CI #104 run 41374239341 Patient model/UI analyze/test and unsigned AAB jobs SUCCESS |
+| Manual payment ledger, one-way status transitions, role/booking-state guards, audit history and Patient/Partner payment status display | Terpenuhi at code/CI level | BookingPaymentTest + AdminUiSupportTest, Backend CI #147 run 41374239305 (139 tests/837 assertions); Flutter CI #104 run 41374239341 Patient model/UI analyze/test and unsigned AAB jobs SUCCESS |
 | Full backend integration flow including payment ledger | Belum | Full register-to-visit/manual-payment/review/delete E2E not evidenced |
 | Staging API configured and apps connected | Menunggu pemilik | No verified owned HTTPS staging URL or Actions variable |
 | Physical Android QA | Belum | No device execution record |
@@ -34,3 +34,10 @@ NO-GO until every required gate is Terpenuhi with exact commit, CI, deployment a
 - Backend CI #147 / `41374239305`: SUCCESS, 139 tests and 837 assertions.
 - Flutter CI #104 / `41374239341`: SUCCESS; Patient/Partner/Core and unsigned QA AABs all SUCCESS; signed AAB SKIPPED; staging APK steps SKIPPED (no staging URL).
 - Patient AAB 51,346,135 bytes; Partner AAB 51,194,150 bytes. Both unsigned QA only.
+
+
+## Partner payment status evidence
+- PartnerBooking parses payment_status and Partner App booking cards show translated status; midwife_models_test covers PAID and default UNPAID.
+- Backend CI #151 / run `41375405844`: SUCCESS.
+- Flutter CI #108 / run `41375405895`: SUCCESS, all core/app/AAB jobs pass; signed AAB and staging APK intentionally skipped.
+- Exact code SHA `9d86e8b296be091f2f387483216d2883b52b4407`.
