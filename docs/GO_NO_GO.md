@@ -1,6 +1,6 @@
 # GO / NO-GO
 
-Decision snapshot: 2 November 2026. Code audit SHA: `a5e5f4eaf93948422e478013c3e53824cb7a28ac`. Overall **NO-GO for release or external clinical use**.
+Decision snapshot: 2 November 2026. Code audit SHA: `c3ddb6ff72997d991a2dcc4e225fe2b99b5c26ff`. Overall **NO-GO for release or external clinical use**.
 
 | Criterion | Status | Evidence/blocker |
 |---|---|---|
@@ -12,6 +12,7 @@ Decision snapshot: 2 November 2026. Code audit SHA: `a5e5f4eaf93948422e478013c3e
 | Non-sensitive `/api/health` database readiness endpoint | Terpenuhi | Backend `HealthEndpointTest`: healthy response and sanitized 503 on DB exception |
 | Admin metrics API role/privacy regression | Terpenuhi | Backend CI #132; AdminDashboardMetricsTest verifies role denial and no PII in aggregate response |
 | Signed partner document URL (5-minute expiry, signature and staff authorization) | Terpenuhi | PartnerVerificationTest on Backend CI #137 (41366219710), exact SHA a5e5f4e |
+| Admin console duplicate-action guard | Terpenuhi | AdminUiSupportTest on Backend CI #139, run 41367194962, exact SHA c3ddb6f |
 | Full backend integration flow | Belum | Full register-to-visit/manual-payment/review/delete E2E not evidenced |
 | Staging API configured and apps connected | Menunggu pemilik | No verified owned HTTPS staging URL or Actions variable |
 | Physical Android QA | Belum | No device execution record |

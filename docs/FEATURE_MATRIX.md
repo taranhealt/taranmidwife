@@ -1,7 +1,7 @@
 # TaranMidwife — Feature Matrix
 
 **Branch:** `infra/android-ci-hardening`  
-**Source audit SHA:** `a5e5f4eaf93948422e478013c3e53824cb7a28ac`  
+**Source audit SHA:** `c3ddb6ff72997d991a2dcc4e225fe2b99b5c26ff`  
 **Scope:** repository source and automated CI evidence. No staging URL, emulator, physical-device session, or production deployment was available. This matrix does not claim end-to-end readiness.
 
 Status meanings:
@@ -66,7 +66,7 @@ Status meanings:
 | Feature | Status | Evidence / reason |
 |---|---|---|
 | Admin verification API | Selesai + teruji at backend level | AdminPartnerController and PartnerVerificationTest |
-| Admin mobile web dashboard metrics | Implemented; API teruji, browser E2E belum teruji | AdminDashboardController, admin.js metrics cards, AdminDashboardMetricsTest (role guard + no PII) | Browser/device QA and visual accessibility check |
+| Admin mobile web dashboard metrics and complaint console | Implemented; backend/API and UI support tests pass, browser E2E belum teruji | AdminDashboardController, admin.js metrics cards, AdminDashboardMetricsTest (role guard + no PII) | Browser/device QA and visual accessibility check |
 | Temporary signed document URLs | Selesai + teruji in backend | Signed URLs expire after 5 minutes; signature + staff auth required; tests reject expired/tampered URLs | Validate HTTPS proxy URL generation in staging |
 | Partner status/reason UX | Backend available; Flutter belum teruji | API returns verification status/review reason; no device evidence |
 | Reschedule/cancellation policy | Belum ada | No complete reschedule workflow/policy test |
@@ -128,3 +128,11 @@ Admin dashboard now fetches aggregate metrics from `GET /api/v1/admin/metrics`: 
 - Backend CI #137 / run `41366219710`: SUCCESS; test job SUCCESS (including valid, expired and tampered signed-document URL tests).
 - Flutter CI #94 / run `41366219716`: SUCCESS. Core, Patient, Partner, both unsigned AAB jobs SUCCESS; staging APK steps SKIPPED because staging URL unset; signed AAB SKIPPED.
 - Patient unsigned AAB: 51,331,418 bytes; Partner unsigned AAB: 51,194,150 bytes.
+
+
+## Latest exact-head verification — admin action guard
+- Code SHA: `c3ddb6ff72997d991a2dcc4e225fe2b99b5c26ff`.
+- Admin console async action buttons now ignore duplicate clicks while a returned Promise is pending; complaint workflow actions return their request Promise so they receive this guard.
+- `AdminUiSupportTest` asserts the guard and complaint resolution binding; Backend CI #139 / run `41367194962`: SUCCESS.
+- Flutter CI #96 / run `41367194904`: SUCCESS. Core, Patient, Partner and both unsigned QA AAB jobs SUCCESS; staging APK steps SKIPPED (no staging URL); signed AAB SKIPPED.
+- Patient unsigned AAB 51,331,418 bytes; Partner unsigned AAB 51,194,150 bytes.

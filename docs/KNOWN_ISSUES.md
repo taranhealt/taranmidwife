@@ -18,7 +18,7 @@
 
 ## CI follow-up
 
-- Latest code SHA: `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.
+- Latest code SHA: `c3ddb6ff72997d991a2dcc4e225fe2b99b5c26ff`.
 - Flutter CI #85 (41363527847) and Backend CI #128 (41363527786) completed successfully.
 - Since `TARAN_STAGING_API_BASE_URL` is unset, the Patient and Partner staging APK build/summary/upload steps are intentionally skipped. No APK is provided by that run.
 - Both unsigned QA AAB compile/upload jobs succeeded; `/api/health` is covered by success and sanitized failure regression tests. These are not signed Play Store artifacts.
@@ -27,3 +27,5 @@
 - Admin metrics API/UI is implemented on latest code; API role/privacy regression test passed in Backend CI #132. Browser interaction and accessibility still require device/browser QA.
 
 - Backend CI #137 (41366219710) and Flutter CI #94 (41366219716) passed on exact code SHA `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.
+
+- Admin web console prevents duplicate asynchronous action submissions. Regression assertion is in AdminUiSupportTest; Backend CI #139 passed. Flutter CI #96 passed on the same SHA.

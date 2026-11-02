@@ -15,7 +15,7 @@ Branch: `infra/android-ci-hardening`; base: `main`; PR #1 remains OPEN/DRAFT. Ma
 
 ## Latest exact code-head verification
 
-- Code SHA: `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.
+- Code SHA: `c3ddb6ff72997d991a2dcc4e225fe2b99b5c26ff`.
 - Flutter CI #85 / run ID `41363527847`: SUCCESS.
   - Core package: SUCCESS.
   - Patient Android app: SUCCESS (analyze/test SUCCESS; staging APK build/upload SKIPPED because staging URL unset).
@@ -62,3 +62,10 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - PartnerVerificationTest covers signed URL success, expired signature rejection, tampered signature rejection, role denial and audit logging.
 - First backend run after signed route change exposed one legacy test using the now-protected unsigned URL (1 failed, 132 passed). Updated the regression test to use the issued signed URL; latest Backend CI #137 passes.
 - Latest exact code SHA `a5e5f4eaf93948422e478013c3e53824cb7a28ac`: Flutter CI #94 (`41366219716`) and Backend CI #137 (`41366219710`) both SUCCESS. Unsigned QA AABs uploaded; no staging APK because staging URL unset.
+
+
+## Admin duplicate-action protection
+- The admin web console's shared button helper now disables buttons while asynchronous actions are pending and restores them after success/failure.
+- Complaint review/resolve/close/reopen callbacks return their request promises, so repeat taps cannot submit the same action concurrently from the same page.
+- Added AdminUiSupportTest source assertion; JavaScript syntax check remains in backend CI.
+- Backend CI #139 / `41367194962`: SUCCESS. Flutter CI #96 / `41367194904`: SUCCESS. Exact code SHA `c3ddb6ff72997d991a2dcc4e225fe2b99b5c26ff`.
