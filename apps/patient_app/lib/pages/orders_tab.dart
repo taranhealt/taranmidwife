@@ -79,8 +79,6 @@ class _OrdersTabState extends State<OrdersTab> {
                         children: [
                           Text(formatWib(b.scheduledStart)),
                           StatusBadge(b.status),
-            const SizedBox(height: 8),
-            _paymentSection(),
                           Text('Pembayaran: ${_paymentLabel(b.paymentStatus)}'),
                         ],
                       ),
@@ -122,16 +120,20 @@ class _BookingSheetState extends State<_BookingSheet> {
   Future<void> _loadPayment() async {
     try {
       final result = await context.read<ApiClient>().send('GET', '/bookings/${widget.booking.id}/payment');
-      if (mounted) setState(() {
-        _payment = result['data'] as Map<String, dynamic>?;
-        _paymentError = null;
-        _paymentLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _payment = result['data'] as Map<String, dynamic>?;
+          _paymentError = null;
+          _paymentLoading = false;
+        });
+      }
     } on ApiException catch (e) {
-      if (mounted) setState(() {
-        _paymentError = e.displayMessage;
-        _paymentLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _paymentError = e.displayMessage;
+          _paymentLoading = false;
+        });
+      }
     }
   }
 
@@ -247,6 +249,8 @@ class _BookingSheetState extends State<_BookingSheet> {
             if (b.addressLine != null) Text('Alamat: ${b.addressLine}'),
             const SizedBox(height: 8),
             StatusBadge(b.status),
+            const SizedBox(height: 8),
+            _paymentSection(),
             if (_error != null) ...[
               const SizedBox(height: 8),
               Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
