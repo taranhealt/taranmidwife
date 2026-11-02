@@ -120,3 +120,10 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Fixed Patient App review widget override annotations and escaped path interpolation.
 - Replaced string concatenation and added braces in coverage result state update to clear analyzer lints.
 - CI on exact HEAD will determine verified status; do not mark review complete before backend tests and Flutter analyze/test/AAB jobs pass.
+
+
+## Booking review feature — exact-head CI evidence
+- Exact code SHA `b5395d1d802a2b9aa6426518dc84a36a35129f19`.
+- Backend CI #159 / `41378854691`: SUCCESS, 142 tests / 852 assertions. Review tests cover completed booking, patient ownership, one-review constraint, rating validation, audit event and anonymous partner aggregate (no patient ID/comment).
+- Flutter CI #116 / `41378854684`: SUCCESS. Core, Patient, Partner and both unsigned QA AAB compile/upload jobs SUCCESS; signed AAB SKIPPED. Patient unsigned AAB 51,367,060 bytes; Partner 51,196,189 bytes.
+- Patient App shows review form only for COMPLETED bookings; comments are encrypted at rest. Public rating API returns average/count only; partner profile UI is not yet integrated.

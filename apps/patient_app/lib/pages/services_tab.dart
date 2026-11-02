@@ -18,6 +18,10 @@ class _ServicesTabState extends State<ServicesTab> {
   List<ServiceItem>? _items;
   String? _error;
   bool _loading = true;
+  String? _filterError;
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _minPriceController = TextEditingController();
+  final TextEditingController _maxPriceController = TextEditingController();
 
   @override
   void initState() {
@@ -25,9 +29,24 @@ class _ServicesTabState extends State<ServicesTab> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _minPriceController.dispose();
+    _maxPriceController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     try {
-      final r = await context.read<ApiClient>().send('GET', '/services', auth: false);
+      final query = <String, String>{};
+      final search = _searchController.text.trim();
+      final minPrice = _minPriceController.text.trim();
+      final maxPrice = _maxPriceController.text.trim();
+      if (search.isNotEmpty) query['search'] = search;
+      if (minPrice.isNotEmpty) query['min_price'] = minPrice;
+      if (maxPrice.isNotEmpty) query['max_price'] = maxPrice;
+      final r = await context.read<ApiClient>().send('GET', '/services', auth: false, query: query);
       final list = (r['data'] as List? ?? const [])
           .map((e) => ServiceItem.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -35,6 +54,7 @@ class _ServicesTabState extends State<ServicesTab> {
         setState(() {
           _items = list;
           _error = null;
+          _filterError = null;
           _loading = false;
         });
       }
@@ -56,6 +76,30 @@ class _ServicesTabState extends State<ServicesTab> {
     _load();
   }
 
+  void _applyFilters() {
+    final min = int.tryParse(_minPriceController.text.trim());
+    final max = int.tryParse(_maxPriceController.text.trim());
+    if ((_minPriceController.text.trim().isNotEmpty && (min == null || min < 0)) ||
+        (_maxPriceController.text.trim().isNotEmpty && (max == null || max < 0))) {
+      setState(() => _filterError = 'Masukkan rentang harga berupa angka nol atau lebih.');
+      return;
+    }
+    if (min != null && max != null && min > max) {
+      setState(() => _filterError = 'Harga minimum tidak boleh melebihi harga maksimum.');
+      return;
+    }
+    setState(() { _loading = true; _filterError = null; });
+    _load();
+  }
+
+  void _clearFilters() {
+    _searchController.clear();
+    _minPriceController.clear();
+    _maxPriceController.clear();
+    setState(() { _loading = true; _filterError = null; });
+    _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
@@ -67,13 +111,55 @@ class _ServicesTabState extends State<ServicesTab> {
         padding: const EdgeInsets.all(16),
         children: [
           const EmergencyNote(),
+          const SizedBox(height: 12),          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (_) => _applyFilters(),
+                    decoration: const InputDecoration(
+                      labelText: 'Cari layanan',
+                      hintText: 'Contoh: kunjungan ibu',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Expanded(child: TextField(
+                      controller: _minPriceController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Harga minimum', prefixText: 'Rp '),
+                    )),
+                    const SizedBox(width: 8),
+                    Expanded(child: TextField(
+                      controller: _maxPriceController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Harga maksimum', prefixText: 'Rp '),
+                    )),
+                  ]),
+                  if (_filterError != null)
+                    Align(alignment: Alignment.centerLeft, child: Text(_filterError!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Expanded(child: FilledButton(onPressed: _applyFilters, child: const Text('Terapkan'))),
+                    const SizedBox(width: 8),
+                    TextButton(onPressed: _clearFilters, child: const Text('Reset')),
+                  ]),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
+
           const _CoverageCard(),
           const SizedBox(height: 12),
           if (items.isEmpty)
             const Padding(
               padding: EdgeInsets.all(24),
-              child: Center(child: Text('Belum ada layanan yang tersedia saat ini.')),
+              child: Center(child: Text('Tidak ada layanan yang sesuai dengan pencarian atau rentang harga.')),
             ),
           for (final s in items) _ServiceCard(service: s, onBooked: widget.onBooked),
         ],

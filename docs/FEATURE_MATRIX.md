@@ -1,7 +1,7 @@
 # TaranMidwife — Feature Matrix
 
 **Branch:** `infra/android-ci-hardening`  
-**Source audit SHA:** `9a32032c848e5af743aa11051c1016ffe72e3333`  
+**Source audit SHA:** `b5395d1d802a2b9aa6426518dc84a36a35129f19`  
 **Scope:** repository source and automated CI evidence. No staging URL, emulator, physical-device session, or production deployment was available. This matrix does not claim end-to-end readiness.
 
 Status meanings:
@@ -72,8 +72,8 @@ Status meanings:
 | Reschedule/cancellation policy | Belum ada | No complete reschedule workflow/policy test |
 | Automatic offer expiry | Backend command exists; scheduler belum teruji | Command/schedule exists; no deployed worker heartbeat |
 | Manual payment ledger/history | Selesai + teruji API; Patient App + admin console UI CI-verified | BookingPaymentController, payment events, locked one-way status, role guards, audit events; BookingPaymentTest; Patient orders detail displays payment status/history; admin console records cash/bank/other or cancellation | Physical device/admin browser QA and deployed staging; Partner App status display added; detailed history remains Patient App/admin only |
-| Booking reviews (one per completed booking) | Scaffold until CI verified | Backend ownership/completion/duplicate guards, encrypted optional comment, anonymous aggregate rating endpoint; Patient App review form in completed booking detail | Partner public profile rating integration and device QA remain |
-| Search/filter/favorites/address book | Belum ada | No complete feature/API/test evidence |
+| Booking reviews (one per completed booking) | Backend + Patient App Selesai, CI teruji | Backend CI #159 (142 tests/852 assertions) covers completed booking, owner, one-time, rating range and anonymous aggregate; Flutter CI #116 Patient analyze/test passes | Partner public profile display and device QA remain |
+| Service search/price filters | Scaffold until CI verified | Public catalog API and Patient App search/min-max price controls added | Region/partner search, rating sort, favorites and address book remain |
 | Local reminders/education content | Belum ada | No verified encrypted reminder/content API |
 | FCM/device token/in-app inbox | Belum ada | No token lifecycle/inbox implementation evidence |
 | Docker/Compose/health/boot validation | Selesai + teruji build/config CI | `backend/Dockerfile`, `compose.yaml`, Caddy HTTPS reverse proxy, PHP-FPM/Nginx, PostgreSQL, worker, scheduler, fail-fast production env validator; Backend CI #152 builds image and validates Compose | Actual VPS deploy, TLS issuance, persistent volumes and smoke test not run |
