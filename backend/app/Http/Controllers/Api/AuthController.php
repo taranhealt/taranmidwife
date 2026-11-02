@@ -35,7 +35,15 @@ class AuthController extends Controller {
     public function login(Request $request): JsonResponse {
         $data = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
         $user = User::where('email', $data['email'])->first();
-        if (! $user || ! Hash::check($data['password'], $user->password) || $user->status !== 'active') {
+        // Selalu keluarkan biaya satu operasi hash, termasuk saat email tidak terdaftar,
+        // agar waktu respons tidak membedakan email yang terdaftar dari yang tidak.
+        if ($user) {
+            $passwordOk = Hash::check($data['password'], $user->password);
+        } else {
+            Hash::make($data['password']);
+            $passwordOk = false;
+        }
+        if (! $passwordOk || $user->status !== 'active') {
             AuditEvent::record('auth.login', null, null, null, 'failure');
             return response()->json(['message' => 'Email atau kata sandi tidak sesuai.'], 401);
         }

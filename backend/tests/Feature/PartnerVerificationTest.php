@@ -105,10 +105,31 @@ class PartnerVerificationTest extends TestCase {
     public function test_document_download_is_restricted_and_audited(): void {
         $u = $this->submitted(); $p = $u->partnerProfile; $doc = $p->documents()->first();
         $this->actingAs($this->user(UserRole::Patient), 'sanctum')->get("/api/v1/admin/partners/{$p->id}/documents/{$doc->id}")->assertStatus(403);
-        $r = $this->actingAs($this->user(UserRole::Reviewer), 'sanctum')->get("/api/v1/admin/partners/{$p->id}/documents/{$doc->id}");
+        $reviewer = $this->user(UserRole::Reviewer);
+        $detail = $this->actingAs($reviewer, 'sanctum')->getJson("/api/v1/admin/partners/{$p->id}")->assertOk();
+        $url = $detail->json('data.documents.0.url');
+        $path = parse_url($url, PHP_URL_PATH) . '?' . parse_url($url, PHP_URL_QUERY);
+        $r = $this->get($path);
         $r->assertOk();
         $this->assertStringContainsString('no-store', $r->headers->get('Cache-Control'));
         $this->assertDatabaseHas('audit_events', ['action' => 'partner.document.view', 'entity_id' => $p->id]);
+    }
+    public function test_document_download_requires_valid_unexpired_signed_url(): void {
+        $u = $this->submitted(); $p = $u->partnerProfile; $doc = $p->documents()->first();
+        $reviewer = $this->user(UserRole::Reviewer);
+        $detail = $this->actingAs($reviewer, 'sanctum')->getJson("/api/v1/admin/partners/{$p->id}")->assertOk();
+        $url = $detail->json('data.documents.0.url');
+        $this->assertNotEmpty($url);
+        $path = parse_url($url, PHP_URL_PATH) . '?' . parse_url($url, PHP_URL_QUERY);
+        $this->get($path)->assertOk();
+        $expired = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'api.v1.admin.partners.documents.signed', now()->subMinute(),
+            ['partner' => $p->id, 'document' => $doc->id]
+        );
+        $expiredPath = parse_url($expired, PHP_URL_PATH) . '?' . parse_url($expired, PHP_URL_QUERY);
+        $this->get($expiredPath)->assertForbidden();
+        $tampered = $path . '&tampered=1';
+        $this->get($tampered)->assertForbidden();
     }
     public function test_activation_requires_valid_sip_and_expiry_command_works(): void {
         $u = $this->partner('APPROVED');

@@ -1,14 +1,31 @@
 <?php
 use App\Http\Controllers\Api\AdminBookingController;
+use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminPartnerController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\BookingPaymentController;
+use App\Http\Controllers\Api\BookingReviewController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\MidwifeBookingController;
 use App\Http\Controllers\Api\MidwifeProfileController;
 use App\Http\Middleware\EnsureRole;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+
+// Minimal readiness endpoint: never exposes configuration, exception or database details.
+Route::get('health', static function () {
+    try {
+        DB::connection()->select('select 1');
+        return response()->json(['status' => 'ok']);
+    } catch (\Throwable $exception) {
+        report($exception);
+        return response()->json(['status' => 'unavailable'], 503);
+    }
+})->middleware('throttle:60,1');
 Route::prefix('v1')->group(function () {
+    Route::get('partners/{partner}/rating', [BookingReviewController::class, 'partnerRating'])->middleware('throttle:60,1');
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('services', [CatalogController::class, 'services']);
         Route::get('areas', [CatalogController::class, 'areas']);
@@ -30,13 +47,23 @@ Route::prefix('v1')->group(function () {
         Route::middleware(EnsureRole::class . ':patient,partner,ops_admin,sysadmin')->group(function () {
             Route::get('bookings', [BookingController::class, 'index']);
             Route::get('bookings/{booking}', [BookingController::class, 'show']);
+            Route::get('bookings/{booking}/payment', [BookingPaymentController::class, 'show']);
         });
         Route::middleware(EnsureRole::class . ':patient')->group(function () {
-            Route::post('bookings', [BookingController::class, 'store']);
+            Route::get('favorites', [FavoriteController::class, 'index']);
+            Route::post('favorites', [FavoriteController::class, 'store'])->middleware('throttle:30,1');
+            Route::delete('favorites/{service}', [FavoriteController::class, 'destroy'])->middleware('throttle:30,1');
+            Route::get('bookings/{booking}/review', [BookingReviewController::class, 'show']);
+            Route::post('bookings/{booking}/review', [BookingReviewController::class, 'store'])->middleware('throttle:10,1');
+            Route::post('bookings', [BookingController::class, 'store'])->middleware('throttle:booking-create');
             Route::get('coverage', [\App\Http\Controllers\Api\CoverageController::class, 'check']);
             Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
         });
         Route::prefix('admin')->group(function () {
+            Route::post('bookings/{booking}/payment', [BookingPaymentController::class, 'update'])->middleware(EnsureRole::class . ':ops_admin,sysadmin');
+            Route::middleware(EnsureRole::class . ':ops_admin,reviewer,sysadmin')->group(function () {
+                Route::get('metrics', [AdminDashboardController::class, 'metrics']);
+            });
             Route::middleware(\App\Http\Middleware\EnsureRole::class . ':ops_admin,reviewer,sysadmin')->group(function () {
                 Route::get('complaints', [\App\Http\Controllers\Api\AdminComplaintController::class, 'index']);
                 Route::get('complaints/{complaint}', [\App\Http\Controllers\Api\AdminComplaintController::class, 'show']);
@@ -50,7 +77,7 @@ Route::prefix('v1')->group(function () {
             Route::middleware(EnsureRole::class . ':reviewer,sysadmin')->group(function () {
                 Route::get('partners', [AdminPartnerController::class, 'index']);
                 Route::get('partners/{partner}', [AdminPartnerController::class, 'show']);
-                Route::get('partners/{partner}/documents/{document}', [AdminPartnerController::class, 'document']);
+                Route::get('partners/{partner}/documents/{document}', [AdminPartnerController::class, 'document'])->middleware('signed')->name('api.v1.admin.partners.documents.signed');
                 Route::post('partners/{partner}/start-review', [AdminPartnerController::class, 'startReview']);
                 Route::post('partners/{partner}/checks', [AdminPartnerController::class, 'recordChecks']);
                 Route::post('partners/{partner}/request-correction', [AdminPartnerController::class, 'requestCorrection']);
@@ -68,12 +95,12 @@ Route::prefix('v1')->group(function () {
                 Route::post('bookings/{booking}/cancel', [AdminBookingController::class, 'cancel']);
             });
         });
-        Route::prefix('midwife')->middleware(EnsureRole::class . ':partner')->group(function () {
+        Route::prefix('midwife')->middleware([EnsureRole::class . ':partner', 'throttle:partner-api'])->group(function () {
             Route::get('profile', [MidwifeProfileController::class, 'show']);
             Route::get('offerings', [\App\Http\Controllers\Api\PartnerOfferingsController::class, 'show']);
             Route::put('offerings', [\App\Http\Controllers\Api\PartnerOfferingsController::class, 'update']);
             Route::put('profile', [MidwifeProfileController::class, 'update']);
-            Route::post('documents', [MidwifeProfileController::class, 'upload']);
+            Route::post('documents', [MidwifeProfileController::class, 'upload'])->middleware('throttle:partner-upload');
             Route::post('verification/submit', [MidwifeProfileController::class, 'submit']);
             Route::post('bookings/{booking}/accept', [MidwifeBookingController::class, 'accept']);
             Route::post('bookings/{booking}/decline', [MidwifeBookingController::class, 'decline']);

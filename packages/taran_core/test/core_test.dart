@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -52,6 +54,20 @@ void main() {
     expect(await tokens.read(), isNull);
   });
 
+  test('timeout mencakup pembacaan seluruh response body', () async {
+    final client = _DelayedBodyClient();
+    final api = ApiClient(
+      baseUrl: 'https://x.test/api/v1',
+      tokens: MemoryTokenStore(),
+      httpClient: client,
+      requestTimeout: const Duration(milliseconds: 10),
+    );
+    await expectLater(
+      api.send('GET', '/me', auth: false),
+      throwsA(isA<ApiException>().having((e) => e.status, 'status', 0)),
+    );
+  });
+
   test('kegagalan jaringan menjadi ApiException status 0', () async {
     final client = MockClient((req) async => throw Exception('putus'));
     final api = ApiClient(baseUrl: 'https://x.test/api/v1', tokens: MemoryTokenStore(), httpClient: client);
@@ -96,11 +112,60 @@ void main() {
     final b = BookingItem.fromJson({
       'id': 'x', 'code': 'TM-1', 'status': 'CONFIRMED',
       'scheduled_start': '2026-11-05T03:00:00+00:00', 'price_amount': 100000,
-      'service': 'Layanan', 'area': 'Wilayah',
+      'service': 'Layanan', 'area': 'Wilayah', 'payment_status': 'PAID',
     });
     expect(b.priceAmount, 100000);
+    expect(b.paymentStatus, 'PAID');
     expect(b.addressLine, isNull);
     expect(bookingStatusInfo('CONFIRMED').label, 'Dikonfirmasi');
     expect(cancellableStatuses.contains('COMPLETED'), isFalse);
   });
+
+  test('isValidApiBaseUrl hanya menerima HTTPS bersih', () {
+    expect(isValidApiBaseUrl('https://api.example.test/api/v1'), isTrue);
+    expect(isValidApiBaseUrl(''), isFalse);
+    expect(isValidApiBaseUrl('http://api.example.test/api/v1'), isFalse);
+    expect(isValidApiBaseUrl('https://user:pw@api.example.test'), isFalse);
+    expect(isValidApiBaseUrl('https://api.example.test/api/v1?x=1'), isFalse);
+    expect(isValidApiBaseUrl('https://api.example.test/api/v1#frag'), isFalse);
+  });
+
+  test('respons non-JSON pada galat server tetap menjadi ApiException', () async {
+    final client = MockClient((req) async => http.Response('<html>502</html>', 502));
+    final api = ApiClient(baseUrl: 'https://x.test/api/v1', tokens: MemoryTokenStore(), httpClient: client);
+    try {
+      await api.send('GET', '/me');
+      fail('harus melempar');
+    } on ApiException catch (e) {
+      expect(e.status, 502);
+    }
+  });
+
+  test('401 pada permintaan tanpa auth tidak menghapus token', () async {
+    final tokens = MemoryTokenStore();
+    await tokens.write('abc');
+    var called = false;
+    final client = MockClient((req) async => http.Response('{"message":"salah"}', 401, headers: _json));
+    final api = ApiClient(
+      baseUrl: 'https://x.test/api/v1',
+      tokens: tokens,
+      httpClient: client,
+      onUnauthorized: () => called = true,
+    );
+    await expectLater(api.send('POST', '/auth/login', body: {}, auth: false), throwsA(isA<ApiException>()));
+    expect(await tokens.read(), 'abc');
+    expect(called, isFalse);
+  });
+}
+
+
+class _DelayedBodyClient extends http.BaseClient {
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final bytes = utf8.encode('{}');
+    final body = Stream<List<int>>.fromFuture(
+      Future<List<int>>.delayed(const Duration(milliseconds: 100), () => bytes),
+    );
+    return http.StreamedResponse(body, 200);
+  }
 }

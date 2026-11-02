@@ -66,6 +66,41 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
+  Future<void> _forgotPassword() async {
+    final email = _email.text.trim();
+    if (!email.contains('@')) {
+      setState(() => _error = 'Masukkan email akun terlebih dahulu.');
+      return;
+    }
+    setState(() { _busy = true; _error = null; });
+    try {
+      final auth = context.read<AuthController>();
+      final result = await auth.api.send(
+        'POST',
+        '/auth/forgot-password',
+        body: {'email': email},
+        auth: false,
+      );
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Periksa email Anda'),
+          content: Text(result['message'] as String? ??
+              'Jika email terdaftar, tautan pengaturan ulang kata sandi telah dikirim.'),
+          actions: [TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Mengerti'),
+          )],
+        ),
+      );
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.displayMessage);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,6 +221,11 @@ class _AuthPageState extends State<AuthPage> {
                     : Text(_register ? 'Daftar' : 'Masuk'),
               ),
             ),
+            if (!_register)
+              TextButton(
+                onPressed: _busy ? null : _forgotPassword,
+                child: const Text('Lupa kata sandi?'),
+              ),
             TextButton(
               onPressed: _busy
                   ? null

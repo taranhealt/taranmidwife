@@ -5,6 +5,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\AuditEvent;
 use App\Models\Booking;
+use App\Models\Complaint;
 use App\Models\PartnerDocument;
 use App\Models\PartnerProfile;
 use App\Models\User;
@@ -43,6 +44,13 @@ class AccountController extends Controller {
                     'landmark' => null, 'cancel_reason' => null, 'patient_lat' => null, 'patient_lng' => null])->save();
             });
 
+            // Complaint descriptions are free text and may contain direct identifiers
+            // or health information. Apply the owner's deletion policy before anonymizing
+            // the reporter account; use the model so the encrypted cast is preserved.
+            Complaint::where('reporter_id', $user->id)->get()->each(function (Complaint $complaint) {
+                $complaint->forceFill(['description' => self::PLACEHOLDER])->save();
+            });
+
             $profile = PartnerProfile::where('user_id', $user->id)->lockForUpdate()->first();
             if ($profile) {
                 $profileId = $profile->id;
@@ -50,7 +58,7 @@ class AccountController extends Controller {
                 PartnerDocument::where('partner_profile_id', $profile->id)->delete();
                 $profile->forceFill(['nik' => null, 'sip_number' => null, 'sip_issuer' => null, 'sip_expires_on' => null,
                     'practice_area' => null, 'review_reason' => null, 'base_lat' => null, 'base_lng' => null,
-                'service_radius_km' => null, 'accepting_requests' => false,
+                    'service_radius_km' => null, 'accepting_requests' => false,
                     'verification_status' => PartnerVerificationStatus::from('SUSPENDED')])->save();
                 DB::table('partner_verification_events')->insert(['id' => (string) Str::ulid(),
                     'partner_profile_id' => $profile->id, 'from_status' => $from, 'to_status' => 'SUSPENDED',

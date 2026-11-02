@@ -11,13 +11,26 @@ void main() {
   final tokens = SecureTokenStore();
   final api = ApiClient(baseUrl: AppConfig.apiBaseUrl, tokens: tokens);
   final auth = AuthController(api, tokens);
-  runApp(PatientApp(api: api, auth: auth));
+  runApp(
+    PatientApp(
+      api: api,
+      auth: auth,
+      apiConfigured: AppConfig.hasValidApiBaseUrl,
+    ),
+  );
 }
 
 class PatientApp extends StatelessWidget {
-  const PatientApp({super.key, required this.api, required this.auth});
+  const PatientApp({
+    super.key,
+    required this.api,
+    required this.auth,
+    this.apiConfigured = true,
+  });
+
   final ApiClient api;
   final AuthController auth;
+  final bool apiConfigured;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +43,43 @@ class PatientApp extends StatelessWidget {
         title: 'TaranMidwife',
         debugShowCheckedModeBanner: false,
         theme: taranTheme(),
-        home: const AuthGate(),
+        home: apiConfigured ? const AuthGate() : const ApiConfigurationPage(),
+      ),
+    );
+  }
+}
+
+class ApiConfigurationPage extends StatelessWidget {
+  const ApiConfigurationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.settings_ethernet, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'TaranMidwife belum dikonfigurasi',
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Alamat server API belum tersedia atau tidak valid. '
+                  'Gunakan build dengan API_BASE_URL HTTPS yang benar. '
+                  'Aplikasi tidak akan mengirim data ke server yang belum ditentukan.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

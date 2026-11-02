@@ -1,0 +1,33 @@
+name: Set up Flutter toolchain
+description: >
+  Installs the pinned Flutter SDK (and optionally Java 17 for Android builds).
+  The Flutter version is pinned here, in one place, so every job and every
+  re-run uses the same toolchain. Bump it deliberately in its own pull request.
+
+inputs:
+  java:
+    description: Install Temurin JDK 17 (needed for Android Gradle builds).
+    required: false
+    default: 'false'
+  flutter-version:
+    description: Exact Flutter stable version used by CI.
+    required: false
+    default: '3.47.9'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Java
+      if: ${{ inputs.java == 'true' }}
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: '17'
+        cache: gradle
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        flutter-version: ${{ inputs.flutter-version }}
+        cache: true

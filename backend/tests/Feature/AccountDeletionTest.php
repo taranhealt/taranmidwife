@@ -3,6 +3,7 @@ namespace Tests\Feature;
 use App\Enums\UserRole;
 use App\Models\Area;
 use App\Models\Booking;
+use App\Models\Complaint;
 use App\Models\PartnerDocument;
 use App\Models\PartnerProfile;
 use App\Models\Service;
@@ -44,11 +45,13 @@ class AccountDeletionTest extends TestCase {
         $this->del($u, 'salah-total')->assertStatus(403)->assertJsonPath('code', 'INVALID_PASSWORD');
         $this->assertSame('active', $u->fresh()->status);
     }
-    public function test_patient_is_anonymized_but_history_is_kept(): void {
+    public function test_patient_is_anonymized_but_history_is_kept_and_complaint_text_is_redacted(): void {
         $u = $this->user(UserRole::Patient);
         $u->forceFill(['phone' => '081200000001'])->save();
         $email = $u->email;
         $b = $this->booking($u, 'COMPLETED');
+        $complaint = Complaint::create(['booking_id' => $b->id, 'reporter_id' => $u->id,
+            'category' => 'OTHER', 'description' => 'Nama pasien dan nomor 081234567890 serta informasi kesehatan uji.']);
         $u->createToken('mobile');
         $this->del($u)->assertOk();
         $f = $u->fresh();
@@ -63,6 +66,8 @@ class AccountDeletionTest extends TestCase {
         $this->assertSame('[DIHAPUS]', $r->contact_phone);
         $this->assertNull($r->landmark);
         $this->assertSame($u->id, (int) $r->patient_id);
+        $this->assertSame('[DIHAPUS]', $complaint->fresh()->description);
+        $this->assertNotSame('[DIHAPUS]', DB::table('complaints')->where('id', $complaint->id)->value('description'));
         $this->assertDatabaseHas('audit_events', ['action' => 'account.delete', 'outcome' => 'success', 'entity_id' => (string) $u->id]);
         $this->postJson('/api/v1/auth/login', ['email' => $email, 'password' => self::PW])->assertStatus(401);
     }

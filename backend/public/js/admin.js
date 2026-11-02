@@ -41,7 +41,15 @@
   function mkBtn(text, cls, fn) {
     var b = el('button', cls || '', text);
     b.type = 'button';
-    b.addEventListener('click', fn);
+    b.addEventListener('click', function () {
+      if (b.disabled) { return; }
+      var result;
+      try { result = fn(); } catch (e) { throw e; }
+      if (result && typeof result.then === 'function') {
+        b.disabled = true;
+        result.then(function () { b.disabled = false; }, function () { b.disabled = false; });
+      }
+    });
     return b;
   }
   function msg(text, kind) {
@@ -120,14 +128,40 @@
       b.dataset.tab = t[0];
       box.appendChild(b);
     });
+    loadMetrics();
     showTab(TABS[role][0][0]);
   }
+  function loadMetrics() {
+    var box = $('metrics');
+    box.textContent = 'Memuat ringkasan...';
+    api('/admin/metrics').then(function (r) {
+      box.textContent = '';
+      if (!r.ok || !r.json || !r.json.data) {
+        box.appendChild(el('p', 'note', 'Ringkasan tidak tersedia saat ini.'));
+        return;
+      }
+      var d = r.json.data;
+      [
+        ['Total pesanan', d.bookings_total],
+        ['Pesanan berjalan', d.bookings_open],
+        ['Mitra aktif', d.active_partners],
+        ['Pengaduan terbuka', d.complaints_open]
+      ].forEach(function (item) {
+        var card = el('div', 'card');
+        card.appendChild(el('div', 'small', item[0]));
+        card.appendChild(el('strong', null, String(item[1])));
+        box.appendChild(card);
+      });
+    });
+  }
+
   function showTab(t) {
     msg('');
     [].forEach.call($('tabs').children, function (b) { b.className = b.dataset.tab === t ? 'active' : 'secondary'; });
     ['orders', 'partners', 'complaints'].forEach(function (p) { $('p-' + p).hidden = (p !== t); });
     if (t === 'orders') { loadOrders(); }
     if (t === 'partners') { loadPartners(); }
+    if (t === 'complaints') { loadComplaints(); }
   }
 
   /* ---------- Pesanan ---------- */
@@ -157,7 +191,13 @@
     c.appendChild(top);
     c.appendChild(el('div', 'small', (b.service || '-') + ' - ' + (b.area || '-')));
     c.appendChild(el('div', 'small', wib(b.scheduled_start) + ' - ' + rupiah(b.price_amount)));
+    c.appendChild(el('div', 'small', 'Pembayaran: ' + paymentLabel(b.payment_status)));
     if (role !== 'ops_admin') {
+      if (role === 'sysadmin') {
+        var sysPaymentArea = el('div');
+        paymentControls(b, sysPaymentArea);
+        c.appendChild(sysPaymentArea);
+      }
       c.appendChild(el('div', 'note', 'Hanya lihat. Tindakan pesanan ada pada admin operasional.'));
       return c;
     }
@@ -166,6 +206,7 @@
     }
     if (b.contact_phone) { c.appendChild(el('div', 'small', 'Telepon: ' + b.contact_phone)); }
     var area = el('div');
+    paymentControls(b, area);
     var row = el('div', 'row');
     if (b.status === 'REQUESTED') {
       row.appendChild(mkBtn('Saring', '', function () {
@@ -182,6 +223,30 @@
     c.appendChild(area);
     return c;
   }
+
+  function paymentLabel(status) {
+    return status === 'PAID' ? 'Sudah dibayar' : (status === 'CANCELLED' ? 'Dibatalkan' : 'Belum dibayar');
+  }
+  function paymentControls(b, holder) {
+    if (b.payment_status !== 'UNPAID') { return; }
+    if (b.status === 'COMPLETED') {
+      var method = el('select');
+      [['CASH', 'Tunai'], ['BANK_TRANSFER', 'Transfer bank'], ['OTHER', 'Lainnya']].forEach(function (item) {
+        var option = el('option', null, item[1]); option.value = item[0]; method.appendChild(option);
+      });
+      holder.appendChild(method);
+      holder.appendChild(mkBtn('Catat pembayaran diterima', '', function () {
+        return post('/admin/bookings/' + b.id + '/payment', { status: 'PAID', method: method.value },
+          'Pembayaran dicatat.').then(function (r) { if (r.ok) { loadOrders(); } });
+      }));
+    } else if (b.status === 'CANCELLED') {
+      holder.appendChild(mkBtn('Tandai pembayaran dibatalkan', 'secondary', function () {
+        return post('/admin/bookings/' + b.id + '/payment', { status: 'CANCELLED' },
+          'Status pembayaran dibatalkan.').then(function (r) { if (r.ok) { loadOrders(); } });
+      }));
+    }
+  }
+
   function showCandidates(b, area) {
     area.textContent = 'Memuat kandidat...';
     api('/admin/bookings/' + b.id + '/candidates').then(function (r) {
@@ -264,7 +329,7 @@
     holder.textContent = 'Membuka...';
     var h = { 'Accept': '*/*' };
     if (token) { h['Authorization'] = 'Bearer ' + token; }
-    fetch(API + '/admin/partners/' + pid + '/documents/' + doc.id, { headers: h }).then(function (res) {
+    fetch(doc.url, { headers: h }).then(function (res) {
       if (!res.ok) { throw new Error('kode ' + res.status); }
       return res.blob();
     }).then(function (blob) {
@@ -389,6 +454,70 @@
     }
   }
 
+  /* ---------- Pengaduan ---------- */
+  var CSTATUS = { OPEN: 'Baru', IN_REVIEW: 'Sedang ditinjau', RESOLVED: 'Diselesaikan', CLOSED: 'Ditutup' };
+  function loadComplaints() {
+    var box = $('complaints');
+    box.textContent = 'Memuat...';
+    var st = $('c-status').value;
+    api('/admin/complaints?per_page=50' + (st ? '&status=' + encodeURIComponent(st) : '')).then(function (r) {
+      box.textContent = '';
+      if (!r.ok) { msg(errText(r), 'err'); return; }
+      var items = listOf(r.json);
+      if (!items.length) { box.appendChild(el('p', 'note', 'Tidak ada pengaduan pada filter ini.')); return; }
+      items.forEach(function (item) { box.appendChild(complaintCard(item)); });
+    });
+  }
+  function complaintAction(id, action, body, okText) {
+    return api('/admin/complaints/' + id + '/' + action, { method: 'POST', body: body || {} }).then(function (r) {
+      if (r.ok) { msg(okText, 'ok'); loadComplaints(); } else { msg(errText(r), 'err'); }
+      return r;
+    });
+  }
+  function complaintCard(item) {
+    var card = el('div', 'card');
+    var top = el('div', 'top');
+    top.appendChild(el('strong', null, item.category || 'Pengaduan'));
+    top.appendChild(el('span', 'chip', CSTATUS[item.status] || item.status));
+    card.appendChild(top);
+    card.appendChild(el('div', 'small', 'Pesanan: ' + (item.booking_code || '-') + ' · ' + wib(item.created_at)));
+    card.appendChild(el('p', null, item.description || '[DIHAPUS]'));
+    if (item.safety_flag) { card.appendChild(el('p', 'warnbox', 'Ditandai sebagai pengaduan keselamatan. Prioritaskan peninjauan.')); }
+    if (item.resolution_note) { card.appendChild(el('p', 'note', 'Catatan penyelesaian: ' + item.resolution_note)); }
+    if (role === 'ops_admin' || role === 'reviewer') {
+      var actions = el('div', 'row');
+      if (item.status === 'OPEN') {
+        actions.appendChild(mkBtn('Mulai tinjau', '', function () {
+          return complaintAction(item.id, 'start-review', {}, 'Peninjauan dimulai.');
+        }));
+      }
+      if (item.status === 'IN_REVIEW') {
+        var note = el('textarea');
+        note.maxLength = 1000;
+        note.required = true;
+        note.placeholder = 'Catatan penyelesaian (wajib)';
+        card.appendChild(note);
+        actions.appendChild(mkBtn('Tandai selesai', '', function () {
+          var value = note.value.trim();
+          if (!value) { msg('Catatan penyelesaian wajib diisi.', 'err'); return; }
+          return complaintAction(item.id, 'resolve', { note: value }, 'Pengaduan diselesaikan.');
+        }));
+      }
+      if (item.status === 'RESOLVED') {
+        actions.appendChild(mkBtn('Tutup', 'secondary', function () {
+          if (window.confirm('Tutup pengaduan ini?')) { return complaintAction(item.id, 'close', {}, 'Pengaduan ditutup.'); }
+        }));
+        actions.appendChild(mkBtn('Buka kembali', 'secondary', function () {
+          if (window.confirm('Buka kembali pengaduan ini?')) { return complaintAction(item.id, 'reopen', {}, 'Pengaduan dibuka kembali.'); }
+        }));
+      }
+      if (actions.children.length) { card.appendChild(actions); }
+    } else {
+      card.appendChild(el('p', 'note', 'Akun ini hanya memiliki akses baca untuk pengaduan.'));
+    }
+    return card;
+  }
+
   /* ---------- Pasang ---------- */
   $('login-form').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -414,6 +543,8 @@
   $('o-status').addEventListener('change', loadOrders);
   $('pa-load').addEventListener('click', loadPartners);
   $('pa-status').addEventListener('change', renderPartnerList);
+  $('c-load').addEventListener('click', loadComplaints);
+  $('c-status').addEventListener('change', loadComplaints);
 
   if (token) {
     api('/me').then(function (r) {

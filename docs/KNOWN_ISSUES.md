@@ -1,0 +1,50 @@
+# Known Issues and Deferred Work
+
+| Priority | Issue | Evidence / next action |
+|---|---|---|
+| P0 | No verified staging API | No owned HTTPS URL or app-to-staging run; provision synthetic staging |
+| P0 | No physical Android QA | No device execution record; run QA checklist after staging |
+| P1 | Reset timing side-channel | Synchronous email only for active users; generic body does not equalize timing |
+| P1 | Signed document URL needs deployed proxy validation | 5-minute signed URL + authenticated staff route implemented and covered by CI; validate URL generation behind real HTTPS reverse proxy |
+| P1 | Booking reschedule and partner-side payment display | Manual payment ledger API, Patient App status/history and admin console controls are implemented and CI-tested; reschedule policy and Partner App display remain incomplete |
+| P1 | Encrypted backup/restore scripts are scaffold only | Configure GPG public recipient, daily cron, off-host copy and execute isolated restore test; no restore evidence yet |
+| P1 | Docker/Compose deployment not deployed | Dockerfile/compose/Caddy/boot validator now exist and Backend CI #152 builds/config-validates them; provision VPS and verify TLS/runtime/health |
+| P1 | No FCM/inbox | No device-token lifecycle or inbox implementation |
+| P1 | Search, favorites, address book and reviews | No complete implementation/test evidence |
+| P2 | R8/minify/mapping and CI version metadata | Not configured/proven |
+| P2 | Composer audit / pub outdated CI gates | Dependabot weekly config exists; audit/outdated gates not yet integrated |
+| P2 | Strict CORS/CSP | Exact allowlist/CSP not verified |
+| P2 | Admin metrics browser QA | Aggregate endpoint and UI cards implemented; browser/device E2E still needed |
+
+## CI follow-up
+
+- Latest code SHA: `9d86e8b296be091f2f387483216d2883b52b4407`.
+- Flutter CI #85 (41363527847) and Backend CI #128 (41363527786) completed successfully.
+- Since `TARAN_STAGING_API_BASE_URL` is unset, the Patient and Partner staging APK build/summary/upload steps are intentionally skipped. No APK is provided by that run.
+- Both unsigned QA AAB compile/upload jobs succeeded; `/api/health` is covered by success and sanitized failure regression tests. These are not signed Play Store artifacts.
+- Workflow includes AAB artifact size/SHA-256 summaries; APK summary executes only when staging is configured.
+
+- Admin metrics API/UI is implemented on latest code; API role/privacy regression test passed in Backend CI #132. Browser interaction and accessibility still require device/browser QA.
+
+- Backend CI #137 (41366219710) and Flutter CI #94 (41366219716) passed on exact code SHA `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.
+
+- Admin web console prevents duplicate asynchronous action submissions. Regression assertion is in AdminUiSupportTest; Backend CI #139 passed. Flutter CI #96 passed on the same SHA.
+
+
+## Manual payment ledger CI follow-up
+- Backend CI #147 / run `41374239305`: SUCCESS, 139 tests / 837 assertions.
+- Flutter CI #104 / run `41374239341`: SUCCESS; patient/partner/core and both unsigned AABs SUCCESS.
+- Payment data intentionally excludes arbitrary free-text notes; method/status/actor/timestamp are recorded. No gateway.
+
+- Partner App payment status display tested in Flutter CI #108 (`41375405895`); Backend CI #151 (`41375405844`) also passed on code SHA `9d86e8b296be091f2f387483216d2883b52b4407`.
+
+
+## Docker CI and backup follow-up
+- Backend CI #152 (`41376664500`) passed on exact HEAD `9a32032c848e5af743aa11051c1016ffe72e3333`; Compose validation, Docker image build and PostgreSQL tests passed.
+- Flutter CI #109 (`41376664527`) passed on the same SHA; core/apps/unsigned QA AABs passed; signed AAB skipped.
+- GPG-encrypted backup and isolated restore scripts exist, but cron, off-host replication and a successful real restore drill remain unverified.
+- No external monitoring, VPS deployment or physical device QA evidence.
+
+- Backup script pipeline failure propagation was tightened: strict Bash mode and separate temporary archives avoid masking tar/pg_dump errors in a pipe. CI shell syntax validation added; actual encrypted backup/restore still requires a VPS and owner-held GPG key.
+
+- Patient App review implementation initially surfaced analyzer findings (misplaced override annotation, deprecated dropdown `value`, and existing coverage string-concatenation/brace lints). Corrected these and await exact-head CI.

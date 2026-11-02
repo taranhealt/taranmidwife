@@ -30,11 +30,20 @@ class AdminUiSupportTest extends TestCase {
         return PartnerProfile::create(['user_id' => $u->id, 'verification_status' => 'APPROVED', 'sip_expires_on' => $sip]);
     }
     public function test_admin_page_loads_without_third_party_resources(): void {
-        $html = $this->get('/admin')->assertOk()->assertSee('Admin')->assertSee('/js/admin.js', false)->getContent();
+        $html = $this->get('/admin')->assertOk()->assertSee('Admin')->assertSee('/js/admin.js', false)->assertSee('id="metrics"', false)
+            ->assertSee('id="c-status"', false)->assertDontSee('segera rilis')->getContent();
         $this->assertFileExists(public_path('js/admin.js'));
         $this->assertStringNotContainsString('unpkg.com', $html);
         $this->assertStringNotContainsString('openstreetmap', $html);
         $this->assertStringNotContainsString('googleapis', $html);
+    }
+    public function test_admin_console_disables_async_action_buttons_until_request_finishes(): void {
+        $js = file_get_contents(public_path('js/admin.js'));
+        $this->assertStringContainsString('if (b.disabled) { return; }', $js);
+        $this->assertStringContainsString("result.then(function () { b.disabled = false; }, function () { b.disabled = false; });", $js);
+        $this->assertStringContainsString("return complaintAction(item.id, 'resolve'", $js);
+        $this->assertStringContainsString("'/admin/bookings/' + b.id + '/payment'", $js);
+        $this->assertStringContainsString('paymentControls(b, area)', $js);
     }
     public function test_booking_list_can_be_filtered_by_status(): void {
         $svc = Service::forceCreate(['id' => (string) Str::ulid(), 'code' => 'T-' . Str::random(6), 'name' => 'Layanan Uji',

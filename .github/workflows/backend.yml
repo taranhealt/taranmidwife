@@ -1,10 +1,14 @@
 name: backend
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -20,12 +24,23 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - name: Validate Compose configuration
+        working-directory: .
+        run: cp .env.docker.example .env && docker compose config --quiet && rm .env
+      - name: Build production Docker image
+        working-directory: .
+        run: docker build -f backend/Dockerfile -t taranmidwife-ci:$GITHUB_SHA backend
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: mbstring, pdo_pgsql, pgsql, xml, ctype, fileinfo, tokenizer, openssl
           coverage: none
+      - name: Check admin console JavaScript syntax
+        run: node --check public/js/admin.js
+      - name: Check deployment and backup shell syntax
+        working-directory: .
+        run: bash -n scripts/backup-db.sh && sh -n scripts/restore-test.sh backend/docker/entrypoint.sh
       - run: composer install --no-interaction --prefer-dist
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test

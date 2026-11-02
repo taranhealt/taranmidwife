@@ -1,5 +1,6 @@
 export 'src/api_client.dart';
 export 'src/api_exception.dart';
+export 'src/api_url.dart';
 export 'src/auth_controller.dart';
 export 'src/format.dart';
 export 'src/models.dart';

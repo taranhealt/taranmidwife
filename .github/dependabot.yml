@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: composer
+    directory: /backend
+    schedule:
+      interval: weekly
+  - package-ecosystem: pub
+    directory: /packages/taran_core
+    schedule:
+      interval: weekly
+  - package-ecosystem: pub
+    directory: /apps/patient_app
+    schedule:
+      interval: weekly
+  - package-ecosystem: pub
+    directory: /apps/partner_app
+    schedule:
+      interval: weekly

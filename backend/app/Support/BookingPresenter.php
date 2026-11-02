@@ -15,7 +15,7 @@ class BookingPresenter {
             'id' => $b->id, 'code' => $b->code, 'status' => $b->status,
             'service' => $b->service?->name, 'area' => $b->area?->name,
             'scheduled_start' => $b->scheduled_start->toIso8601String(),
-            'price_amount' => $b->price_amount,
+            'price_amount' => $b->price_amount, 'payment_status' => $b->payment_status ?? 'UNPAID',
         ];
         if ($viewer->role === UserRole::Partner && $b->patient_lat !== null && $b->patient_lng !== null) {
             $sp = \App\Models\PartnerProfile::where('user_id', $viewer->id)->first(['base_lat', 'base_lng']);

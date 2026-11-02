@@ -53,6 +53,15 @@ class BookingFlowTest extends TestCase {
         $this->create($p, ['scheduled_start' => now('Asia/Jakarta')->subDay()->setTime(10, 0)->toIso8601String()], 'kunci-uji-0003')->assertStatus(422);
         $this->assertDatabaseCount('bookings', 0);
     }
+    public function test_booking_creation_has_a_separate_per_patient_rate_limit(): void {
+        $patient = $this->user(UserRole::Patient);
+        for ($i = 1; $i <= 10; $i++) {
+            $this->create($patient, [], 'rate-limit-test-' . str_pad((string) $i, 4, '0', STR_PAD_LEFT))
+                ->assertCreated();
+        }
+        $this->create($patient, [], 'rate-limit-test-0011')->assertStatus(429);
+    }
+
     public function test_inactive_service_or_area_rejected(): void {
         $p = $this->user(UserRole::Patient);
         $this->service->update(['active' => false]);

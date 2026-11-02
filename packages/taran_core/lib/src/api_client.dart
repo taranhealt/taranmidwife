@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -13,6 +14,8 @@ class ApiClient {
     required this.tokens,
     http.Client? httpClient,
     this.onUnauthorized,
+    this.requestTimeout = const Duration(seconds: 20),
+    this.uploadTimeout = const Duration(seconds: 60),
   }) : _http = httpClient ?? http.Client();
 
   final String baseUrl;
@@ -20,10 +23,20 @@ class ApiClient {
   final http.Client _http;
   void Function()? onUnauthorized;
 
+  final Duration requestTimeout;
+
+  /// Unggahan berkas (hingga 5 MB) di jaringan seluler butuh waktu lebih lama.
+  final Duration uploadTimeout;
+
   Uri _uri(String path, Map<String, String>? query) {
     final base = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
     final uri = Uri.parse('$base$path');
     return (query == null || query.isEmpty) ? uri : uri.replace(queryParameters: query);
+  }
+
+  Future<Map<String, String>> _authHeader() async {
+    final token = await tokens.read();
+    return (token != null && token.isNotEmpty) ? {'Authorization': 'Bearer $token'} : const {};
   }
 
   Future<JsonMap> send(
@@ -37,37 +50,72 @@ class ApiClient {
     final h = <String, String>{'Accept': 'application/json'};
     if (body != null) h['Content-Type'] = 'application/json';
     if (headers != null) h.addAll(headers);
-    if (auth) {
-      final token = await tokens.read();
-      if (token != null && token.isNotEmpty) h['Authorization'] = 'Bearer $token';
-    }
+    if (auth) h.addAll(await _authHeader());
+
     final request = http.Request(method, _uri(path, query));
     request.headers.addAll(h);
     if (body != null) request.body = jsonEncode(body);
 
+    return _dispatch(
+      request,
+      timeout: requestTimeout,
+      networkMessage: 'Tidak dapat terhubung. Periksa koneksi internet Anda lalu coba lagi.',
+      handleUnauthorized: auth,
+    );
+  }
+
+  Future<JsonMap> uploadFile(
+    String path, {
+    required String field,
+    required File file,
+    Map<String, String>? fields,
+  }) async {
+    final request = http.MultipartRequest('POST', _uri(path, null));
+    request.headers['Accept'] = 'application/json';
+    request.headers.addAll(await _authHeader());
+    if (fields != null) request.fields.addAll(fields);
+    request.files.add(await http.MultipartFile.fromPath(field, file.path));
+
+    return _dispatch(
+      request,
+      timeout: uploadTimeout,
+      networkMessage: 'Unggah gagal. Periksa koneksi internet lalu coba lagi.',
+      handleUnauthorized: true,
+    );
+  }
+
+  /// Satu jalur kirim, urai, dan petakan galat untuk semua jenis permintaan.
+  Future<JsonMap> _dispatch(
+    http.BaseRequest request, {
+    required Duration timeout,
+    required String networkMessage,
+    required bool handleUnauthorized,
+  }) async {
     final http.Response res;
     try {
-      final streamed = await _http.send(request).timeout(const Duration(seconds: 20));
-      res = await http.Response.fromStream(streamed);
+      // Bound the complete request lifecycle, including response-body streaming.
+      // Timing out only send() leaves Response.fromStream() able to hang forever
+      // when a proxy or mobile connection stalls after response headers.
+      res = await _http.send(request).then(http.Response.fromStream).timeout(timeout);
     } catch (_) {
-      throw const ApiException(
-        status: 0,
-        message: 'Tidak dapat terhubung. Periksa koneksi internet Anda lalu coba lagi.',
-      );
+      throw ApiException(status: 0, message: networkMessage);
     }
 
-    JsonMap data = {};
-    if (res.bodyBytes.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(utf8.decode(res.bodyBytes));
-        if (decoded is Map<String, dynamic>) data = decoded;
-      } catch (_) {}
-    }
+    final data = _decode(res);
     if (res.statusCode >= 200 && res.statusCode < 300) return data;
-    if (res.statusCode == 401 && auth) {
+    if (res.statusCode == 401 && handleUnauthorized) {
       await tokens.clear();
       onUnauthorized?.call();
     }
     throw ApiException.fromResponse(res.statusCode, data);
+  }
+
+  JsonMap _decode(http.Response res) {
+    if (res.bodyBytes.isEmpty) return {};
+    try {
+      final decoded = jsonDecode(utf8.decode(res.bodyBytes));
+      if (decoded is Map<String, dynamic>) return decoded;
+    } catch (_) {}
+    return {};
   }
 }

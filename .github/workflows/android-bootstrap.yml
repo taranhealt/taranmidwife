@@ -1,45 +1,38 @@
-name: android-bootstrap
+name: Android project verification
+
 on:
   workflow_dispatch:
-    inputs:
-      app:
-        description: 'patient atau mitra'
-        required: true
-        default: patient
-        type: choice
-        options:
-          - patient
-          - mitra
+
 permissions:
-  contents: write
+  contents: read
+
 jobs:
-  bootstrap:
-    runs-on: ubuntu-latest
+  verify:
+    name: Verify existing Android project
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - name: Buat kerangka Android
+          cache: true
+      - name: Verify patient Android project
         run: |
-          if [ "${{ inputs.app }}" = "patient" ]; then
-            DIR=apps/patient_app; APPID=com.taranrainmakergroup.taranmidwife; NAME=taranmidwife; LABEL="TaranMidwife"
-          else
-            DIR=apps/partner_app; APPID=com.taranrainmakergroup.taranmidwife.mitra; NAME=taranmidwife_mitra; LABEL="TaranMidwife Mitra"
-          fi
-          cd "$DIR"
-          flutter create --platforms=android --org com.taranrainmakergroup --project-name "$NAME" .
-          MAN=android/app/src/main/AndroidManifest.xml
-          grep -q 'android.permission.INTERNET' "$MAN" || sed -i '0,/<application/ s#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' "$MAN"
-          sed -i "s#android:label=\"[^\"]*\"#android:label=\"$LABEL\"#" "$MAN"
-          G=$(ls android/app/build.gradle.kts android/app/build.gradle 2>/dev/null | head -1)
-          sed -i -E "s#applicationId = \"[^\"]*\"#applicationId = \"$APPID\"#; s#applicationId \"[^\"]*\"#applicationId \"$APPID\"#" "$G"
-          sed -i -E 's#minSdk = flutter\.minSdkVersion#minSdk = maxOf(flutter.minSdkVersion, 24)#; s#minSdkVersion flutter\.minSdkVersion#minSdkVersion Math.max(flutter.minSdkVersion, 24)#' "$G"
-          grep -nE 'applicationId|minSdk' "$G"
-          grep -nE 'INTERNET|android:label' "$MAN"
-      - name: Simpan kerangka ke repositori
+          test -f apps/patient_app/android/app/build.gradle.kts
+          test -f apps/patient_app/android/settings.gradle.kts
+          test -f apps/patient_app/android/gradle/wrapper/gradle-wrapper.properties
+          test -f apps/partner_app/android/app/build.gradle.kts
+          test -f apps/partner_app/android/settings.gradle.kts
+          flutter --version
+          java -version
+      - name: Verify compileSdk guard remains present
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then echo "tidak ada perubahan"; else git commit -m "chore(android): kerangka Android ${{ inputs.app }} dari flutter create"; git push; fi
+          grep -q 'finalizeDsl' apps/patient_app/android/build.gradle.kts
+          grep -q 'finalizeDsl' apps/partner_app/android/build.gradle.kts
