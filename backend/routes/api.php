@@ -66,7 +66,7 @@ Route::prefix('v1')->group(function () {
             Route::middleware(EnsureRole::class . ':reviewer,sysadmin')->group(function () {
                 Route::get('partners', [AdminPartnerController::class, 'index']);
                 Route::get('partners/{partner}', [AdminPartnerController::class, 'show']);
-                Route::get('partners/{partner}/documents/{document}', [AdminPartnerController::class, 'document']);
+                Route::get('partners/{partner}/documents/{document}', [AdminPartnerController::class, 'document'])->middleware('signed')->name('api.v1.admin.partners.documents.signed');
                 Route::post('partners/{partner}/start-review', [AdminPartnerController::class, 'startReview']);
                 Route::post('partners/{partner}/checks', [AdminPartnerController::class, 'recordChecks']);
                 Route::post('partners/{partner}/request-correction', [AdminPartnerController::class, 'requestCorrection']);

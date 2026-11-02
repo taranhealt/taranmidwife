@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 class AdminPartnerController extends Controller {
     public const ITEM_TYPES = ['IDENTITY', 'PROFESSIONAL_STATUS', 'IHS', 'SIP', 'FACE_PHOTO'];
@@ -29,7 +30,11 @@ class AdminPartnerController extends Controller {
             'sip_number' => $p->sip_number, 'sip_issuer' => $p->sip_issuer,
             'sip_expires_on' => $p->sip_expires_on?->toDateString(), 'practice_area' => $p->practice_area,
             'submitted_at' => $p->submitted_at?->toIso8601String(), 'review_reason' => $p->review_reason,
-            'documents' => $p->documents()->get(['id', 'type', 'mime', 'size_bytes'])->all(),
+            'documents' => $p->documents()->get(['id', 'type', 'mime', 'size_bytes'])->map(fn ($d) => [
+                'id' => $d->id, 'type' => $d->type, 'mime' => $d->mime, 'size_bytes' => $d->size_bytes,
+                'url' => URL::temporarySignedRoute('api.v1.admin.partners.documents.signed', now()->addMinutes(5),
+                    ['partner' => $p->id, 'document' => $d->id]),
+            ])->all(),
             'checks' => $items->map(fn ($i) => ['item_type' => $i->item_type, 'result' => $i->result, 'method' => $i->method])->all(),
             'limitations' => $items->where('result', 'unverified_limited')->pluck('item_type')->values()->all(),
         ];

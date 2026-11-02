@@ -290,7 +290,7 @@
     holder.textContent = 'Membuka...';
     var h = { 'Accept': '*/*' };
     if (token) { h['Authorization'] = 'Bearer ' + token; }
-    fetch(API + '/admin/partners/' + pid + '/documents/' + doc.id, { headers: h }).then(function (res) {
+    fetch(doc.url, { headers: h }).then(function (res) {
       if (!res.ok) { throw new Error('kode ' + res.status); }
       return res.blob();
     }).then(function (blob) {
