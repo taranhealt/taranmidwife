@@ -153,6 +153,7 @@
     ['orders', 'partners', 'complaints'].forEach(function (p) { $('p-' + p).hidden = (p !== t); });
     if (t === 'orders') { loadOrders(); }
     if (t === 'partners') { loadPartners(); }
+    if (t === 'complaints') { loadComplaints(); }
   }
 
   /* ---------- Pesanan ---------- */
@@ -414,6 +415,70 @@
     }
   }
 
+  /* ---------- Pengaduan ---------- */
+  var CSTATUS = { OPEN: 'Baru', IN_REVIEW: 'Sedang ditinjau', RESOLVED: 'Diselesaikan', CLOSED: 'Ditutup' };
+  function loadComplaints() {
+    var box = $('complaints');
+    box.textContent = 'Memuat...';
+    var st = $('c-status').value;
+    api('/admin/complaints?per_page=50' + (st ? '&status=' + encodeURIComponent(st) : '')).then(function (r) {
+      box.textContent = '';
+      if (!r.ok) { msg(errText(r), 'err'); return; }
+      var items = listOf(r.json);
+      if (!items.length) { box.appendChild(el('p', 'note', 'Tidak ada pengaduan pada filter ini.')); return; }
+      items.forEach(function (item) { box.appendChild(complaintCard(item)); });
+    });
+  }
+  function complaintAction(id, action, body, okText) {
+    return api('/admin/complaints/' + id + '/' + action, { method: 'POST', body: body || {} }).then(function (r) {
+      if (r.ok) { msg(okText, 'ok'); loadComplaints(); } else { msg(errText(r), 'err'); }
+      return r;
+    });
+  }
+  function complaintCard(item) {
+    var card = el('div', 'card');
+    var top = el('div', 'top');
+    top.appendChild(el('strong', null, item.category || 'Pengaduan'));
+    top.appendChild(el('span', 'chip', CSTATUS[item.status] || item.status));
+    card.appendChild(top);
+    card.appendChild(el('div', 'small', 'Pesanan: ' + (item.booking_code || '-') + ' · ' + wib(item.created_at)));
+    card.appendChild(el('p', null, item.description || '[DIHAPUS]'));
+    if (item.safety_flag) { card.appendChild(el('p', 'warnbox', 'Ditandai sebagai pengaduan keselamatan. Prioritaskan peninjauan.')); }
+    if (item.resolution_note) { card.appendChild(el('p', 'note', 'Catatan penyelesaian: ' + item.resolution_note)); }
+    if (role === 'ops_admin' || role === 'reviewer') {
+      var actions = el('div', 'row');
+      if (item.status === 'OPEN') {
+        actions.appendChild(mkBtn('Mulai tinjau', '', function () {
+          complaintAction(item.id, 'start-review', {}, 'Peninjauan dimulai.');
+        }));
+      }
+      if (item.status === 'IN_REVIEW') {
+        var note = el('textarea');
+        note.maxLength = 1000;
+        note.required = true;
+        note.placeholder = 'Catatan penyelesaian (wajib)';
+        card.appendChild(note);
+        actions.appendChild(mkBtn('Tandai selesai', '', function () {
+          var value = note.value.trim();
+          if (!value) { msg('Catatan penyelesaian wajib diisi.', 'err'); return; }
+          complaintAction(item.id, 'resolve', { note: value }, 'Pengaduan diselesaikan.');
+        }));
+      }
+      if (item.status === 'RESOLVED') {
+        actions.appendChild(mkBtn('Tutup', 'secondary', function () {
+          if (window.confirm('Tutup pengaduan ini?')) { complaintAction(item.id, 'close', {}, 'Pengaduan ditutup.'); }
+        }));
+        actions.appendChild(mkBtn('Buka kembali', 'secondary', function () {
+          if (window.confirm('Buka kembali pengaduan ini?')) { complaintAction(item.id, 'reopen', {}, 'Pengaduan dibuka kembali.'); }
+        }));
+      }
+      if (actions.children.length) { card.appendChild(actions); }
+    } else {
+      card.appendChild(el('p', 'note', 'Akun ini hanya memiliki akses baca untuk pengaduan.'));
+    }
+    return card;
+  }
+
   /* ---------- Pasang ---------- */
   $('login-form').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -439,6 +504,8 @@
   $('o-status').addEventListener('change', loadOrders);
   $('pa-load').addEventListener('click', loadPartners);
   $('pa-status').addEventListener('change', renderPartnerList);
+  $('c-load').addEventListener('click', loadComplaints);
+  $('c-status').addEventListener('change', loadComplaints);
 
   if (token) {
     api('/me').then(function (r) {

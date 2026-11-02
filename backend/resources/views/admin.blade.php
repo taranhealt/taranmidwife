@@ -76,7 +76,16 @@
 
     <section id="p-complaints" hidden>
       <h2>Pengaduan</h2>
-      <p>Penanganan pengaduan lewat tampilan ini segera rilis. API-nya sudah tersedia.</p>
+      <label for="c-status">Status</label>
+      <select id="c-status">
+        <option value="">Semua</option>
+        <option value="OPEN">Baru</option>
+        <option value="IN_REVIEW">Sedang ditinjau</option>
+        <option value="RESOLVED">Diselesaikan</option>
+        <option value="CLOSED">Ditutup</option>
+      </select>
+      <div class="row"><button id="c-load" class="secondary" type="button">Muat ulang</button></div>
+      <div id="complaints"></div>
     </section>
   </div>
 </main>
