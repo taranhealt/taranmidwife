@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\BookingPaymentController;
 use App\Http\Controllers\Api\BookingReviewController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\MidwifeBookingController;
 use App\Http\Controllers\Api\MidwifeProfileController;
@@ -49,6 +50,9 @@ Route::prefix('v1')->group(function () {
             Route::get('bookings/{booking}/payment', [BookingPaymentController::class, 'show']);
         });
         Route::middleware(EnsureRole::class . ':patient')->group(function () {
+            Route::get('favorites', [FavoriteController::class, 'index']);
+            Route::post('favorites', [FavoriteController::class, 'store'])->middleware('throttle:30,1');
+            Route::delete('favorites/{service}', [FavoriteController::class, 'destroy'])->middleware('throttle:30,1');
             Route::get('bookings/{booking}/review', [BookingReviewController::class, 'show']);
             Route::post('bookings/{booking}/review', [BookingReviewController::class, 'store'])->middleware('throttle:10,1');
             Route::post('bookings', [BookingController::class, 'store'])->middleware('throttle:booking-create');
