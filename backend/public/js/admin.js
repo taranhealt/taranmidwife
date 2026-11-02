@@ -41,7 +41,15 @@
   function mkBtn(text, cls, fn) {
     var b = el('button', cls || '', text);
     b.type = 'button';
-    b.addEventListener('click', fn);
+    b.addEventListener('click', function () {
+      if (b.disabled) { return; }
+      var result;
+      try { result = fn(); } catch (e) { throw e; }
+      if (result && typeof result.then === 'function') {
+        b.disabled = true;
+        result.then(function () { b.disabled = false; }, function () { b.disabled = false; });
+      }
+    });
     return b;
   }
   function msg(text, kind) {
@@ -449,7 +457,7 @@
       var actions = el('div', 'row');
       if (item.status === 'OPEN') {
         actions.appendChild(mkBtn('Mulai tinjau', '', function () {
-          complaintAction(item.id, 'start-review', {}, 'Peninjauan dimulai.');
+          return complaintAction(item.id, 'start-review', {}, 'Peninjauan dimulai.');
         }));
       }
       if (item.status === 'IN_REVIEW') {
@@ -461,15 +469,15 @@
         actions.appendChild(mkBtn('Tandai selesai', '', function () {
           var value = note.value.trim();
           if (!value) { msg('Catatan penyelesaian wajib diisi.', 'err'); return; }
-          complaintAction(item.id, 'resolve', { note: value }, 'Pengaduan diselesaikan.');
+          return complaintAction(item.id, 'resolve', { note: value }, 'Pengaduan diselesaikan.');
         }));
       }
       if (item.status === 'RESOLVED') {
         actions.appendChild(mkBtn('Tutup', 'secondary', function () {
-          if (window.confirm('Tutup pengaduan ini?')) { complaintAction(item.id, 'close', {}, 'Pengaduan ditutup.'); }
+          if (window.confirm('Tutup pengaduan ini?')) { return complaintAction(item.id, 'close', {}, 'Pengaduan ditutup.'); }
         }));
         actions.appendChild(mkBtn('Buka kembali', 'secondary', function () {
-          if (window.confirm('Buka kembali pengaduan ini?')) { complaintAction(item.id, 'reopen', {}, 'Pengaduan dibuka kembali.'); }
+          if (window.confirm('Buka kembali pengaduan ini?')) { return complaintAction(item.id, 'reopen', {}, 'Pengaduan dibuka kembali.'); }
         }));
       }
       if (actions.children.length) { card.appendChild(actions); }

@@ -37,6 +37,12 @@ class AdminUiSupportTest extends TestCase {
         $this->assertStringNotContainsString('openstreetmap', $html);
         $this->assertStringNotContainsString('googleapis', $html);
     }
+    public function test_admin_console_disables_async_action_buttons_until_request_finishes(): void {
+        $js = file_get_contents(public_path('js/admin.js'));
+        $this->assertStringContainsString('if (b.disabled) { return; }', $js);
+        $this->assertStringContainsString("result.then(function () { b.disabled = false; }, function () { b.disabled = false; });", $js);
+        $this->assertStringContainsString("return complaintAction(item.id, 'resolve'", $js);
+    }
     public function test_booking_list_can_be_filtered_by_status(): void {
         $svc = Service::forceCreate(['id' => (string) Str::ulid(), 'code' => 'T-' . Str::random(6), 'name' => 'Layanan Uji',
             'price_amount' => 100000, 'active' => true, 'description' => '[DATA UJI]', 'limitations' => 'Uji']);
