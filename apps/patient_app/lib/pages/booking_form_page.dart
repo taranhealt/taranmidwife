@@ -133,7 +133,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
                   const LinearProgressIndicator()
                 else
                   DropdownButtonFormField<String>(
-                    value: _areaId,
+                    initialValue: _areaId,
                     decoration: const InputDecoration(labelText: 'Wilayah'),
                     items: [for (final a in _areas!) DropdownMenuItem(value: a.id, child: Text(a.name))],
                     onChanged: (v) => setState(() => _areaId = v),
@@ -149,7 +149,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<int>(
-                  value: _slot,
+                  initialValue: _slot,
                   decoration: const InputDecoration(labelText: 'Jam kunjungan'),
                   items: [
                     for (final h in _slots)

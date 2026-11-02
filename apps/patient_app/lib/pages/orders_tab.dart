@@ -425,7 +425,7 @@ class _ComplaintDialogState extends State<_ComplaintDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              value: _category,
+              initialValue: _category,
               isExpanded: true,
               decoration: const InputDecoration(labelText: 'Kategori'),
               items: _categories.entries.map((e) =>

@@ -46,3 +46,5 @@
 - No external monitoring, VPS deployment or physical device QA evidence.
 
 - Backup script pipeline failure propagation was tightened: strict Bash mode and separate temporary archives avoid masking tar/pg_dump errors in a pipe. CI shell syntax validation added; actual encrypted backup/restore still requires a VPS and owner-held GPG key.
+
+- Patient App review implementation initially surfaced analyzer findings (misplaced override annotation, deprecated dropdown `value`, and existing coverage string-concatenation/brace lints). Corrected these and await exact-head CI.

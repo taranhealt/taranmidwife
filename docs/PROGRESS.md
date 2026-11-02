@@ -113,3 +113,10 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Public partner rating endpoint returns only aggregate average/count and never returns patient identity or review comment.
 - Patient App completed-booking detail now loads review state and provides a one-time rating/comment form with loading/error/double-submit guards.
 - Backend and Flutter CI must pass on the resulting exact SHA before this feature can be marked tested; partner public profile display and device QA remain outstanding.
+
+
+## Flutter analyzer cleanup after review UI increment
+- Replaced deprecated `DropdownButtonFormField.value` with `initialValue` in Patient App booking and complaint forms.
+- Fixed Patient App review widget override annotations and escaped path interpolation.
+- Replaced string concatenation and added braces in coverage result state update to clear analyzer lints.
+- CI on exact HEAD will determine verified status; do not mark review complete before backend tests and Flutter analyze/test/AAB jobs pass.

@@ -167,11 +167,15 @@ class _CoverageCardState extends State<_CoverageCard> {
       final serviceable = d['serviceable'] == true;
       final pilot = (d['pilot_name'] ?? 'wilayah pilot').toString();
       final count = (d['partners_nearby'] ?? 0).toString();
-      if (mounted) setState(() => _result = serviceable
-        ? 'Layanan tersedia di sekitar lokasi Anda. Mitra terdekat: ' + count + '.'
-        : (inPilot
-          ? 'Lokasi termasuk ' + pilot + ', tetapi belum ada mitra yang tersedia.'
-          : 'Lokasi berada di luar wilayah pilot ' + pilot + '.'));
+      if (mounted) {
+        setState(() {
+          _result = serviceable
+              ? 'Layanan tersedia di sekitar lokasi Anda. Mitra terdekat: $count.'
+              : inPilot
+                  ? 'Lokasi termasuk $pilot, tetapi belum ada mitra yang tersedia.'
+                  : 'Lokasi berada di luar wilayah pilot $pilot.';
+        });
+      }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.displayMessage);
     } finally {
