@@ -17,8 +17,8 @@ class BookingReviewTest extends TestCase {
         return $user;
     }
     private function completedBooking(User $patient, User $partner, string $status = 'COMPLETED'): Booking {
-        $service = Service::create(['code' => 'REV-1', 'name' => 'Layanan Uji', 'price_amount' => 100000, 'active' => true]);
-        $area = Area::create(['name' => 'Area Uji', 'active' => true]);
+        $service = Service::create(['code' => 'REV-' . \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(6)), 'name' => 'Layanan Uji', 'price_amount' => 100000, 'active' => true]);
+        $area = Area::create(['name' => 'Area ' . \Illuminate\Support\Str::random(6), 'active' => true]);
         $booking = Booking::create([
             'code' => 'REV-' . strtoupper(substr((string) \Illuminate\Support\Str::ulid(), -8)),
             'patient_id' => $patient->id, 'service_id' => $service->id, 'area_id' => $area->id,
@@ -51,7 +51,7 @@ class BookingReviewTest extends TestCase {
         $partner = $this->user(UserRole::Partner);
         $booking = $this->completedBooking($patient, $partner);
         $this->actingAs($other, 'sanctum')->postJson("/api/v1/bookings/{$booking->id}/review", ['rating' => 4])->assertNotFound();
-        $pending = $this->completedBooking($patient, $partner, 'CONFIRMED');
+        $pending = $this->completedBooking($patient, $this->user(UserRole::Partner), 'CONFIRMED');
         $this->actingAs($patient, 'sanctum')->postJson("/api/v1/bookings/{$pending->id}/review", ['rating' => 4])->assertStatus(422);
     }
     public function test_duplicate_review_is_rejected_and_rating_validation_is_strict(): void {

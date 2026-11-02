@@ -133,7 +133,7 @@ class _BookingSheetState extends State<_BookingSheet> {
   Future<void> _loadReview() async {
     setState(() => _reviewLoading = true);
     try {
-      final result = await context.read<ApiClient>().send('GET', '/bookings/\${widget.booking.id}/review');
+      final result = await context.read<ApiClient>().send('GET', '/bookings/${widget.booking.id}/review');
       if (mounted) setState(() { _review = result['data'] as Map<String, dynamic>?; _reviewError = null; _reviewLoading = false; });
     } on ApiException catch (e) {
       if (mounted) setState(() { _reviewError = e.displayMessage; _reviewLoading = false; });
@@ -144,7 +144,7 @@ class _BookingSheetState extends State<_BookingSheet> {
     if (_reviewSubmitting || _review != null) return;
     setState(() { _reviewSubmitting = true; _reviewError = null; });
     try {
-      final result = await context.read<ApiClient>().send('POST', '/bookings/\${widget.booking.id}/review', body: {
+      final result = await context.read<ApiClient>().send('POST', '/bookings/${widget.booking.id}/review', body: {
         'rating': _rating, 'comment': _reviewComment.text.trim().isEmpty ? null : _reviewComment.text.trim(),
       });
       if (mounted) setState(() { _review = result['data'] as Map<String, dynamic>?; _reviewError = null; });
@@ -268,7 +268,6 @@ class _BookingSheetState extends State<_BookingSheet> {
       ],
     );
   }
-  @override
   Widget _reviewSection() {
     if (widget.booking.status != 'COMPLETED') return const SizedBox.shrink();
     if (_reviewLoading) return const LinearProgressIndicator();
@@ -300,6 +299,7 @@ class _BookingSheetState extends State<_BookingSheet> {
       )),
     ]);
   }
+  @override
   Widget build(BuildContext context) {
     final b = widget.booking;
     return SafeArea(
