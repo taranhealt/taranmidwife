@@ -25,6 +25,12 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v5
+      - name: Validate Compose configuration
+        working-directory: .
+        run: cp .env.docker.example .env && docker compose config --quiet && rm .env
+      - name: Build production Docker image
+        working-directory: .
+        run: docker build -f backend/Dockerfile -t taranmidwife-ci:$GITHUB_SHA backend
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
