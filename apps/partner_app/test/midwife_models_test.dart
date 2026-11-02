@@ -46,3 +46,15 @@ void main() {
     expect(parseServicePoint('3,5', '98,6', '5').point?.radiusKm, 5);
   });
 }
+
+  test('status pembayaran mitra dibaca dengan default aman', () {
+    final paid = PartnerBooking.fromJson({
+      'id': 'b1', 'code': 'TM-1', 'status': 'COMPLETED',
+      'payment_status': 'PAID',
+    });
+    final unpaid = PartnerBooking.fromJson({
+      'id': 'b2', 'code': 'TM-2', 'status': 'CONFIRMED',
+    });
+    expect(paid.paymentStatus, 'PAID');
+    expect(unpaid.paymentStatus, 'UNPAID');
+  });

@@ -239,6 +239,7 @@ class PartnerBooking {
     this.addressLine,
     this.landmark,
     this.contactPhone,
+    this.paymentStatus = 'UNPAID',
   });
 
   factory PartnerBooking.fromJson(JsonMap j) => PartnerBooking(
@@ -253,6 +254,7 @@ class PartnerBooking {
         addressLine: strOrNull(j['address_line']),
         landmark: strOrNull(j['landmark']),
         contactPhone: strOrNull(j['contact_phone']),
+        paymentStatus: strOrNull(j['payment_status']) ?? 'UNPAID',
       );
 
   final String id;
@@ -266,6 +268,7 @@ class PartnerBooking {
   final String? addressLine;
   final String? landmark;
   final String? contactPhone;
+  final String paymentStatus;
 }
 
 /// Tindakan mitra pada pesanan; `name` dipakai langsung sebagai segmen URL

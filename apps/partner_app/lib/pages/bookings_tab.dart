@@ -175,6 +175,7 @@ class _BookingCard extends StatelessWidget {
           children: [
             Text(b.service ?? 'Layanan', style: Theme.of(context).textTheme.titleMedium),
             StatusBadge(b.status),
+            Text('Pembayaran: ${_partnerPaymentLabel(b.paymentStatus)}'),
             Text('Kode: ${b.code}'),
             if (start != null) Text('Jadwal: ${formatWib(start)}'),
             if (b.area != null) Text('Wilayah: ${b.area}'),
@@ -193,3 +194,9 @@ class _BookingCard extends StatelessWidget {
     );
   }
 }
+
+String _partnerPaymentLabel(String status) => switch (status) {
+  'PAID' => 'Sudah dibayar',
+  'CANCELLED' => 'Dibatalkan',
+  _ => 'Belum dibayar',
+};
