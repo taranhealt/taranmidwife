@@ -105,7 +105,11 @@ class PartnerVerificationTest extends TestCase {
     public function test_document_download_is_restricted_and_audited(): void {
         $u = $this->submitted(); $p = $u->partnerProfile; $doc = $p->documents()->first();
         $this->actingAs($this->user(UserRole::Patient), 'sanctum')->get("/api/v1/admin/partners/{$p->id}/documents/{$doc->id}")->assertStatus(403);
-        $r = $this->actingAs($this->user(UserRole::Reviewer), 'sanctum')->get("/api/v1/admin/partners/{$p->id}/documents/{$doc->id}");
+        $reviewer = $this->user(UserRole::Reviewer);
+        $detail = $this->actingAs($reviewer, 'sanctum')->getJson("/api/v1/admin/partners/{$p->id}")->assertOk();
+        $url = $detail->json('data.documents.0.url');
+        $path = parse_url($url, PHP_URL_PATH) . '?' . parse_url($url, PHP_URL_QUERY);
+        $r = $this->get($path);
         $r->assertOk();
         $this->assertStringContainsString('no-store', $r->headers->get('Cache-Control'));
         $this->assertDatabaseHas('audit_events', ['action' => 'partner.document.view', 'entity_id' => $p->id]);
