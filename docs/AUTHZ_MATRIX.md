@@ -15,7 +15,7 @@ Source review at branch snapshot cc161bc12ce8824d0f1abeb68dbf0cf4fcb7945e. Stati
 | Admin complaint transitions | Deny | Deny | Allow | Allow | Deny | Ops/reviewer |
 | Admin partner read/docs/review/checks/correction | Deny | Deny | Deny | Allow | Allow | Private disk; access audit |
 | Admin partner approve/reject/activate/suspend | Deny | Deny | Deny | Deny | Allow | Sysadmin only |
-| Admin booking screen/assign/cancel | Deny | Deny | Allow | Deny | Deny | Ops admin |
+| Admin booking screen/assign/cancel | Deny | Deny | Allow | Deny | Deny | Ops admin |\n| POST /admin/bookings/{id}/payment | Deny | Deny | Allow | Deny | Allow | Ops admin/sysadmin; one-way payment status, completed/cancelled booking guard |\n| GET /bookings/{id}/payment | Own | Active assignment | Global | Deny | Global | Same booking scope as booking detail; read-only history |
 | /midwife/* | Deny | Allow | Deny | Deny | Deny | Partner profile from authenticated user; booking actions require active assignment |
 
 ## Gaps

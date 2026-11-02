@@ -69,3 +69,16 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Complaint review/resolve/close/reopen callbacks return their request promises, so repeat taps cannot submit the same action concurrently from the same page.
 - Added AdminUiSupportTest source assertion; JavaScript syntax check remains in backend CI.
 - Backend CI #139 / `41367194962`: SUCCESS. Flutter CI #96 / `41367194904`: SUCCESS. Exact code SHA `c3ddb6ff72997d991a2dcc4e225fe2b99b5c26ff`.
+
+
+## Manual payment ledger and patient visibility
+- Added PostgreSQL migration for booking payment status and append-only payment event history.
+- Added API to read payment history for booking owner / assigned partner / authorized operations roles, and ops_admin/sysadmin-only write endpoint.
+- State policy: initial UNPAID; PAID only after COMPLETED; CANCELLED only after booking CANCELLED; status is final through ordinary workflow. Methods are CASH, BANK_TRANSFER, OTHER. No payment gateway, no free-text payment notes.
+- Every status change records actor/time/method and an audit event; database row is locked during mutation to prevent concurrent duplicate writes.
+- Patient App booking detail loads status/history; booking list displays payment status. Admin console offers payment recording to ops_admin/sysadmin.
+- Tests: BookingPaymentTest (4 tests) and AdminUiSupportTest UI hook assertions.
+- Backend CI #147 / run `41374239305`: SUCCESS, 139 tests / 837 assertions.
+- Flutter CI #104 / run `41374239341`: SUCCESS; Patient/Partner/Core and both unsigned QA AABs SUCCESS; signed AAB skipped; staging APK skipped because URL unset.
+- Exact code SHA `49d5f09cd0d1b827a8481eb57add0fafdf41ce13`.
+- Remaining: partner-side payment display, real browser/device verification and full staging flow.
