@@ -5,7 +5,7 @@
 | P0 | No verified staging API | No owned HTTPS URL or app-to-staging run; provision synthetic staging |
 | P0 | No physical Android QA | No device execution record; run QA checklist after staging |
 | P1 | Reset timing side-channel | Synchronous email only for active users; generic body does not equalize timing |
-| P1 | No temporary signed document URL | Authenticated direct download exists; signed-link workflow still needed |
+| P1 | Signed document URL needs deployed proxy validation | 5-minute signed URL + authenticated staff route implemented and covered by CI; validate URL generation behind real HTTPS reverse proxy |
 | P1 | Booking scheduling/reschedule/payment | Reschedule policy and manual payment ledger not implemented |
 | P1 | No backup/restore, health endpoint or boot validation | Implement and run restore drill |
 | P1 | No Docker/compose deployment | Not found in audited source |
@@ -18,10 +18,12 @@
 
 ## CI follow-up
 
-- Latest code SHA: `30da6557ea6ecd1ed898d7040162c56570d13caa`.
+- Latest code SHA: `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.
 - Flutter CI #85 (41363527847) and Backend CI #128 (41363527786) completed successfully.
 - Since `TARAN_STAGING_API_BASE_URL` is unset, the Patient and Partner staging APK build/summary/upload steps are intentionally skipped. No APK is provided by that run.
 - Both unsigned QA AAB compile/upload jobs succeeded; `/api/health` is covered by success and sanitized failure regression tests. These are not signed Play Store artifacts.
 - Workflow includes AAB artifact size/SHA-256 summaries; APK summary executes only when staging is configured.
 
 - Admin metrics API/UI is implemented on latest code; API role/privacy regression test passed in Backend CI #132. Browser interaction and accessibility still require device/browser QA.
+
+- Backend CI #137 (41366219710) and Flutter CI #94 (41366219716) passed on exact code SHA `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.

@@ -15,7 +15,7 @@ Branch: `infra/android-ci-hardening`; base: `main`; PR #1 remains OPEN/DRAFT. Ma
 
 ## Latest exact code-head verification
 
-- Code SHA: `30da6557ea6ecd1ed898d7040162c56570d13caa`.
+- Code SHA: `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.
 - Flutter CI #85 / run ID `41363527847`: SUCCESS.
   - Core package: SUCCESS.
   - Patient Android app: SUCCESS (analyze/test SUCCESS; staging APK build/upload SKIPPED because staging URL unset).
@@ -54,3 +54,11 @@ Repository work was performed through GitHub APIs. No local PHP/Flutter runtime,
 - Added regression test for role denial and PII-free aggregate output.
 - Backend CI #132 / 41364515569: SUCCESS.
 - Flutter CI #89 / 41364515586: SUCCESS; staging APK steps skipped because staging URL remains unset; both unsigned AABs compiled and uploaded.
+
+
+## Admin complaint console and temporary document URLs
+- Admin web console complaint tab now loads/filter complaints and supports start review, resolve with mandatory note, close and reopen. Backend transition/audit/privacy coverage remains in ComplaintTest; markup and JavaScript syntax are checked in Backend CI.
+- Admin partner detail now issues 5-minute Laravel temporary signed document URLs. Download still requires authenticated reviewer/sysadmin role, signed URL validation and private local storage; access is audited and responses use no-store.
+- PartnerVerificationTest covers signed URL success, expired signature rejection, tampered signature rejection, role denial and audit logging.
+- First backend run after signed route change exposed one legacy test using the now-protected unsigned URL (1 failed, 132 passed). Updated the regression test to use the issued signed URL; latest Backend CI #137 passes.
+- Latest exact code SHA `a5e5f4eaf93948422e478013c3e53824cb7a28ac`: Flutter CI #94 (`41366219716`) and Backend CI #137 (`41366219710`) both SUCCESS. Unsigned QA AABs uploaded; no staging APK because staging URL unset.

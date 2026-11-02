@@ -1,7 +1,7 @@
 # TaranMidwife — Feature Matrix
 
 **Branch:** `infra/android-ci-hardening`  
-**Source audit SHA:** `30da6557ea6ecd1ed898d7040162c56570d13caa`  
+**Source audit SHA:** `a5e5f4eaf93948422e478013c3e53824cb7a28ac`  
 **Scope:** repository source and automated CI evidence. No staging URL, emulator, physical-device session, or production deployment was available. This matrix does not claim end-to-end readiness.
 
 Status meanings:
@@ -24,9 +24,9 @@ Status meanings:
 | Partner profile/verification submission | Selesai + teruji | MidwifeProfileController, PartnerVerificationTest | Device/API round-trip |
 | Partner offerings/areas/hours/service point | Selesai + teruji | PartnerOfferingsController, PartnerApiHardeningTest | Staging round-trip |
 | Private partner document upload | Selesai + teruji | MIME/size validation and PartnerApiHardeningTest | Production storage permissions |
-| Admin document download | Selesai + teruji (authenticated) | AdminPartnerController and route role middleware | Temporary signed URL workflow is not implemented |
+| Admin document download | Selesai + teruji | AdminPartnerController issues 5-minute temporary signed URLs; signed middleware, authenticated staff role, private storage and audit log; PartnerVerificationTest covers valid, expired, tampered URLs | Browser/mobile QA and deployed HTTPS proxy validation |
 | Partner ownership/offerings isolation | Selesai + teruji for tested paths | authenticated-user ownership and isolation assertions | Expand IDOR coverage to every sensitive resource |
-| Complaints create/list/admin workflow | Selesai + teruji | ComplaintController and ComplaintTest | Legal retention and operational escalation review |
+| Complaints create/list/admin workflow | Selesai + teruji at API level; admin web UI CI checked | AdminComplaintController/ComplaintWorkflow, ComplaintTest, admin.js and AdminUiSupportTest; status filter, review/resolve/reopen/close | Browser/device QA and legal retention review |
 | Account deletion/anonymization | Selesai + teruji | AccountController, AccountDeletionTest; complaint free text redacted to [DIHAPUS] | Legal review and deployed wording check |
 | Password reset API | Selesai + teruji (synchronous path) | PasswordResetController, PasswordResetTest | Real mail provider, timing-side-channel mitigation |
 | Rate limiting | Selesai + teruji for configured paths | auth/complaint/partner/upload limiters; booking-create 10/min/user-IP regression test | Verify trusted proxy/IP behavior |
@@ -67,7 +67,7 @@ Status meanings:
 |---|---|---|
 | Admin verification API | Selesai + teruji at backend level | AdminPartnerController and PartnerVerificationTest |
 | Admin mobile web dashboard metrics | Implemented; API teruji, browser E2E belum teruji | AdminDashboardController, admin.js metrics cards, AdminDashboardMetricsTest (role guard + no PII) | Browser/device QA and visual accessibility check |
-| Temporary signed document URLs | Belum ada | Current download is authenticated direct download |
+| Temporary signed document URLs | Selesai + teruji in backend | Signed URLs expire after 5 minutes; signature + staff auth required; tests reject expired/tampered URLs | Validate HTTPS proxy URL generation in staging |
 | Partner status/reason UX | Backend available; Flutter belum teruji | API returns verification status/review reason; no device evidence |
 | Reschedule/cancellation policy | Belum ada | No complete reschedule workflow/policy test |
 | Automatic offer expiry | Backend command exists; scheduler belum teruji | Command/schedule exists; no deployed worker heartbeat |
@@ -85,7 +85,7 @@ Status meanings:
 | Item | Status | Evidence | Notes |
 |---|---|---|---|
 | Shared core analyze/test | Selesai + teruji | Flutter CI #81, run 41364515586, SHA f9bcafc | Core job SUCCESS |
-| Patient analyze/test | Selesai + teruji | Flutter CI #81, run 41362379396 | Analyze/test SUCCESS |
+| Patient analyze/test | Selesai + teruji | Flutter CI #94, run 41366219716 | Analyze/test SUCCESS |
 | Partner analyze/test | Selesai + teruji | Flutter CI #81, run 41362379396 | Analyze/test SUCCESS |
 | Patient/Partner staging debug APK | Dilewati | TARAN_STAGING_API_BASE_URL unset; build, summary and upload steps SKIPPED | No APK artifact for this run |
 | Patient/Partner unsigned QA AAB compile | Selesai + teruji | Flutter CI #81, run 41362379396 | Both compile and upload SUCCESS; unsigned only |
@@ -121,3 +121,10 @@ Code SHA `30da6557ea6ecd1ed898d7040162c56570d13caa`.
 
 ## Admin metrics increment
 Admin dashboard now fetches aggregate metrics from `GET /api/v1/admin/metrics`: total bookings, non-terminal bookings, active partners and open/in-review complaints. Route allows only ops_admin, reviewer and sysadmin. The endpoint returns aggregate counts only, with regression coverage proving patient denial and absence of booking address, phone and complaint text in the response. Browser E2E remains untested.
+
+
+## Latest exact-head verification — signed document URL increment
+- Code SHA: `a5e5f4eaf93948422e478013c3e53824cb7a28ac`.
+- Backend CI #137 / run `41366219710`: SUCCESS; test job SUCCESS (including valid, expired and tampered signed-document URL tests).
+- Flutter CI #94 / run `41366219716`: SUCCESS. Core, Patient, Partner, both unsigned AAB jobs SUCCESS; staging APK steps SKIPPED because staging URL unset; signed AAB SKIPPED.
+- Patient unsigned AAB: 51,331,418 bytes; Partner unsigned AAB: 51,194,150 bytes.
